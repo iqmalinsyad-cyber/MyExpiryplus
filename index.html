@@ -404,13 +404,13 @@
         // =========================================================================
         // PENTING: KONFIGURASI FIREBASE ANDA SENDIRI (UNTUK SYNC DI MANA-MANA)
         // =========================================================================
-        const myFirebaseConfig = {
-            apiKey: "SILA_LETAK_API_KEY_ANDA",
-            authDomain: "SILA_LETAK_AUTH_DOMAIN_ANDA",
-            projectId: "SILA_LETAK_PROJECT_ID_ANDA",
-            storageBucket: "SILA_LETAK_STORAGE_BUCKET_ANDA",
-            messagingSenderId: "SILA_LETAK_MESSAGING_SENDER_ID_ANDA",
-            appId: "SILA_LETAK_APP_ID_ANDA"
+        const firebaseConfig = {
+          apiKey: "AIzaSyDoqzlqifrHbbBYviaYGhQh-QUoFqRw6Iw",
+          authDomain: "docuvault-v2.firebaseapp.com",
+          projectId: "docuvault-v2",
+          storageBucket: "docuvault-v2.firebasestorage.app",
+          messagingSenderId: "734492192690",
+          appId: "1:734492192690:web:4c9529d6818319f76b3eab"
         };
         // =========================================================================
 
@@ -447,10 +447,37 @@
             } else {
                 // Anonymous Log In (Tetamu) ATAU Tiada Akaun
                 btnLogin.classList.remove('hidden');
-                profileArea.classList.replace('hidden', 'flex'); // Boleh hide ini jika tak nak tunjuk langsung, tapi elok tunjuk sbg 'Tetamu'
+                profileArea.classList.replace('hidden', 'flex');
                 userName.innerText = "Tetamu (Lokal)";
                 userPic.classList.add('hidden');
                 userInitial.classList.remove('hidden');
+            }
+        };
+
+        // Takrifkan fungsi log masuk secara Global agar sentiasa boleh dipanggil butang HTML
+        window.loginGoogle = async () => {
+            if (!auth) {
+                alert("Sila masukkan API Key Firebase anda di bahagian kod (myFirebaseConfig) untuk membolehkan fungsi Log Masuk.");
+                return;
+            }
+            try {
+                const provider = new GoogleAuthProvider();
+                await signInWithPopup(auth, provider);
+            } catch (error) {
+                console.error("Ralat Google Auth:", error);
+                // Tunjuk alert custom jika error (biasanya error iframe block di preview web)
+                document.getElementById('modal-amaran').classList.replace('hidden', 'flex');
+            }
+        };
+
+        window.logoutGoogle = async () => {
+            if (!auth) return;
+            try {
+                await signOut(auth);
+                // Selepas logout, login kembali sbg tetamu supaya app masih boleh dipakai lokal
+                await signInAnonymously(auth);
+            } catch (error) {
+                console.error("Ralat Log Keluar:", error);
             }
         };
 
@@ -481,29 +508,6 @@
                     kemaskiniData();
                 }
             });
-            
-            // FUNGSI GOOGLE AUTH
-            const provider = new GoogleAuthProvider();
-            
-            window.loginGoogle = async () => {
-                try {
-                    await signInWithPopup(auth, provider);
-                } catch (error) {
-                    console.error("Ralat Google Auth:", error);
-                    // Tunjuk alert custom jika error (biasanya error iframe block di preview web)
-                    document.getElementById('modal-amaran').classList.replace('hidden', 'flex');
-                }
-            };
-
-            window.logoutGoogle = async () => {
-                try {
-                    await signOut(auth);
-                    // Selepas logout, login kembali sbg tetamu supaya app masih boleh dipakai lokal
-                    await signInAnonymously(auth);
-                } catch (error) {
-                    console.error("Ralat Log Keluar:", error);
-                }
-            };
 
         } else {
             console.warn("Firebase belum dikonfigurasi.");
