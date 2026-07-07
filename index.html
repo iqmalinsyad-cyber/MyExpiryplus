@@ -2,10 +2,47 @@
 <html lang="ms">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Memastikan tiada masalah zoom ketika menaip di mobile untuk feel aplikasi natif -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>MyExpiry+ - Sistem Pengurusan Tamat Tempoh & Waranti</title>
+    
+    <!-- ================= TETAPAN "ADD TO HOME SCREEN" (PWA) ================= -->
+    <meta name="theme-color" content="#14b8a6">
+    <meta name="mobile-web-app-capable" content="yes">
+    
+    <!-- Tetapan khusus untuk peranti Apple (iOS) -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="MyExpiry+">
+    <link rel="apple-touch-icon" href="https://lh3.googleusercontent.com/d/1FjDbZbvpm6mNqef6ApAP8QJaS3CskOqw">
+    
     <!-- Favicon Sistem -->
     <link rel="icon" href="https://lh3.googleusercontent.com/d/1FjDbZbvpm6mNqef6ApAP8QJaS3CskOqw" type="image/png">
+    
+    <!-- Penjanaan Web App Manifest secara dinamik supaya tidak memerlukan fail berasingan -->
+    <script>
+        const manifestJSON = {
+            "name": "MyExpiry+",
+            "short_name": "MyExpiry+",
+            "description": "Sistem Pengurusan Tamat Tempoh & Waranti",
+            "start_url": window.location.pathname,
+            "display": "standalone",
+            "background_color": "#f8fafc",
+            "theme_color": "#14b8a6",
+            "icons": [
+                {
+                    "src": "https://lh3.googleusercontent.com/d/1FjDbZbvpm6mNqef6ApAP8QJaS3CskOqw",
+                    "sizes": "192x192 512x512",
+                    "type": "image/png"
+                }
+            ]
+        };
+        const blob = new Blob([JSON.stringify(manifestJSON)], {type: 'application/manifest+json'});
+        const manifestURL = URL.createObjectURL(blob);
+        document.write(`<link rel="manifest" href="${manifestURL}">`);
+    </script>
+    <!-- ================= TAMAT TETAPAN PWA ================= -->
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts -->
@@ -109,7 +146,7 @@
                 <h1 class="text-3xl font-bold text-slate-800">Papan Pemuka Pintar</h1>
                 <p class="text-slate-500 mt-1 font-medium">Uruskan inventori makanan dan waranti anda dengan mudah.</p>
             </div>
-            <button onclick="bukaModalTambah()" class="bg-teal-500 hover:bg-teal-600 text-white px-6 py-3 rounded-xl font-bold transition-all shadow-lg shadow-teal-500/30 flex items-center gap-2 transform hover:-translate-y-1">
+            <button onclick="window.bukaModalTambah()" class="bg-teal-500 hover:bg-teal-600 text-white px-6 py-3 rounded-xl font-bold transition-all shadow-lg shadow-teal-500/30 flex items-center gap-2 transform hover:-translate-y-1">
                 <i class="fas fa-plus-circle text-lg"></i> Tambah Rekod Baru
             </button>
         </header>
@@ -170,9 +207,9 @@
                 
                 <!-- Tab Navigasi -->
                 <div class="flex bg-slate-200/50 rounded-xl p-1 shadow-inner w-full sm:w-auto">
-                    <button onclick="tukarTab('Semua')" id="tab-Semua" class="tab-btn flex-1 sm:flex-none px-6 py-2 text-sm rounded-lg bg-white text-slate-800 font-bold shadow-sm transition-all">Semua</button>
-                    <button onclick="tukarTab('Makanan')" id="tab-Makanan" class="tab-btn flex-1 sm:flex-none px-6 py-2 text-sm rounded-lg text-slate-500 hover:text-slate-700 font-semibold transition-all">Makanan</button>
-                    <button onclick="tukarTab('Waranti')" id="tab-Waranti" class="tab-btn flex-1 sm:flex-none px-6 py-2 text-sm rounded-lg text-slate-500 hover:text-slate-700 font-semibold transition-all">Waranti</button>
+                    <button onclick="window.tukarTab('Semua')" id="tab-Semua" class="tab-btn flex-1 sm:flex-none px-6 py-2 text-sm rounded-lg bg-white text-slate-800 font-bold shadow-sm transition-all">Semua</button>
+                    <button onclick="window.tukarTab('Makanan')" id="tab-Makanan" class="tab-btn flex-1 sm:flex-none px-6 py-2 text-sm rounded-lg text-slate-500 hover:text-slate-700 font-semibold transition-all">Makanan</button>
+                    <button onclick="window.tukarTab('Waranti')" id="tab-Waranti" class="tab-btn flex-1 sm:flex-none px-6 py-2 text-sm rounded-lg text-slate-500 hover:text-slate-700 font-semibold transition-all">Waranti</button>
                 </div>
             </div>
             
@@ -210,7 +247,7 @@
                 <h3 class="font-bold text-2xl mb-1">Daftar Item Baru</h3>
                 <p class="text-teal-50 text-sm">Masukkan butiran untuk pemantauan.</p>
             </div>
-            <form id="borang" class="p-6 sm:p-8" onsubmit="simpanData(event)">
+            <form id="borang" class="p-6 sm:p-8" onsubmit="window.simpanData(event)">
                 <div class="space-y-5">
                     <div>
                         <label class="block text-sm font-bold text-slate-700 mb-2">Nama Produk / Item</label>
@@ -250,7 +287,7 @@
                     </div>
                 </div>
                 <div class="mt-8 flex gap-3">
-                    <button type="button" onclick="tutupModalTambah()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-3.5 rounded-xl transition-colors">Batal</button>
+                    <button type="button" onclick="window.tutupModalTambah()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-3.5 rounded-xl transition-colors">Batal</button>
                     <button type="submit" class="flex-[2] bg-teal-500 hover:bg-teal-600 text-white font-bold py-3.5 rounded-xl transition-all shadow-lg shadow-teal-500/30">Simpan Rekod</button>
                 </div>
             </form>
@@ -263,7 +300,7 @@
             
             <!-- Bahagian Header Modal Info -->
             <div id="info-header" class="h-32 bg-slate-200 relative flex items-center justify-center">
-                <button onclick="tutupModalInfo()" class="absolute top-4 right-4 h-8 w-8 bg-black/20 hover:bg-black/40 text-white rounded-full flex items-center justify-center backdrop-blur-sm transition-colors">
+                <button onclick="window.tutupModalInfo()" class="absolute top-4 right-4 h-8 w-8 bg-black/20 hover:bg-black/40 text-white rounded-full flex items-center justify-center backdrop-blur-sm transition-colors">
                     <i class="fas fa-times"></i>
                 </button>
                 <!-- Ikon Besar Ditengah -->
@@ -282,16 +319,16 @@
                 <div class="bg-slate-50 rounded-2xl p-5 text-left border border-slate-100 mb-6">
                     <div class="flex justify-between items-center mb-4">
                         <span class="text-slate-500 font-bold text-sm">Tarikh Didaftar:</span>
-                        <span id="info-tarikh-daftar" class="text-slate-800 font-semibold">1 Jan 2024</span>
+                        <span id="info-tarikh-daftar" class="text-slate-800 font-semibold">-</span>
                     </div>
                     <div class="flex justify-between items-center mb-4">
                         <span class="text-slate-500 font-bold text-sm">Tarikh Sasaran:</span>
-                        <span id="info-tarikh-sasaran" class="text-slate-800 font-black text-lg">31 Dis 2024</span>
+                        <span id="info-tarikh-sasaran" class="text-slate-800 font-black text-lg">-</span>
                     </div>
                     <div class="w-full h-px bg-slate-200 my-4"></div>
                     <div class="flex flex-col">
                         <span class="text-slate-500 font-bold text-sm mb-1">Baki Masa Terkini:</span>
-                        <span id="info-baki-masa" class="text-xl font-black">Tinggal X Hari</span>
+                        <span id="info-baki-masa" class="text-xl font-black">-</span>
                     </div>
                 </div>
 
@@ -301,7 +338,7 @@
                 </div>
                 
                 <div class="mt-6 flex gap-3">
-                    <button onclick="tutupModalInfo()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 rounded-xl transition-colors">Tutup</button>
+                    <button onclick="window.tutupModalInfo()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 rounded-xl transition-colors">Tutup</button>
                     <!-- Butang Padam Dari Dalam Modal Info -->
                     <button id="btn-padam-info" class="flex-1 bg-red-50 hover:bg-red-100 text-red-600 font-bold py-3 rounded-xl transition-colors border border-red-200 flex items-center justify-center gap-2">
                         <i class="fas fa-trash-can"></i> Padam Rekod
@@ -311,27 +348,69 @@
         </div>
     </div>
 
-    <!-- ================= SCRIPT LOGIK SISTEM ================= -->
-    <script>
-        // Data Mockup (Termasuk tarikh pendaftaran & nota)
-        const t = (h) => { let d = new Date(); d.setDate(d.getDate() + h); return d.toISOString().split('T')[0]; };
-        
-        // URL Ikon 3D Baharu
+    <!-- ================= SCRIPT LOGIK SISTEM (REAL-TIME FIREBASE) ================= -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // URL Ikon 3D
         const ikonMakanan = "https://lh3.googleusercontent.com/d/1IKpcPxySHIRYsdhZ6i46vTob_0hIVmT_";
         const ikonWaranti = "https://lh3.googleusercontent.com/d/1hu1Z7oLRGxvUE37p1oX5Mhwhw53FGm5f";
-        const ikonMakananTamat = "https://img.icons8.com/3d-fluency/100/delete-trash.png"; // Ikon tong sampah untuk makanan rosak
-        const ikonWarantiTamat = "https://img.icons8.com/3d-fluency/100/cancel.png";    // Ikon pangkah untuk waranti tamat
+        const ikonMakananTamat = "https://img.icons8.com/3d-fluency/100/delete-trash.png"; 
+        const ikonWarantiTamat = "https://img.icons8.com/3d-fluency/100/cancel.png";    
 
-        let pangkalanData = [
-            { id: 1, nama: 'Susu UHT Full Cream', jenis: 'Makanan', tarikh: t(-2), daftar: t(-30), nota: 'Dalam pantri kabinet atas' },
-            { id: 2, nama: 'Mesin Basuh Automatik LG', jenis: 'Waranti', tarikh: t(-10), daftar: t(-400), nota: 'Resit dalam fail hijau' },
-            { id: 3, nama: 'Roti Gandum Penuh', jenis: 'Makanan', tarikh: t(3), daftar: t(-3), nota: 'Atas meja makan' },
-            { id: 4, nama: 'Penyaman Udara Daikin', jenis: 'Waranti', tarikh: t(5), daftar: t(-360), nota: 'Waranti pengeluar 1 tahun' },
-            { id: 5, nama: 'Ubat Paracetamol', jenis: 'Makanan', tarikh: t(45), daftar: t(-10), nota: 'Peti kecemasan' },
-            { id: 6, nama: 'Telefon Pintar Galaxy', jenis: 'Waranti', tarikh: t(120), daftar: t(-245), nota: 'Beli di kedai rasmi' }
-        ];
+        // Pengurusan State Awalan 
+        // Dikosongkan untuk data real-time, tiada lagi 'mock data'
+        window.pangkalanData = []; 
+        window.tabSemasa = 'Semua';
+        
+        let app, auth, db, user;
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
 
-        let tabSemasa = 'Semua';
+        // Inisialisasi Firebase jika berada dalam persekitaran yang betul
+        if (firebaseConfig) {
+            app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+
+            const initAuth = async () => {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            };
+            initAuth();
+
+            onAuthStateChanged(auth, (u) => {
+                if (u) {
+                    user = u;
+                    muatTurunDataRealtime();
+                } else {
+                    user = null;
+                }
+            });
+        } else {
+            // Berfungsi sebagai memori setempat (local) jika fail dibuka di luar
+            kemaskiniData();
+        }
+
+        function muatTurunDataRealtime() {
+            if (!user) return;
+            const colRef = collection(db, 'artifacts', appId, 'users', user.uid, 'myexpiry_items');
+            
+            onSnapshot(colRef, (snapshot) => {
+                window.pangkalanData = [];
+                snapshot.forEach(doc => {
+                    window.pangkalanData.push({ dbId: doc.id, ...doc.data() });
+                });
+                kemaskiniData();
+            }, (error) => {
+                console.error("Ralat memuat turun data:", error);
+            });
+        }
 
         // Fungsi Mengira Hari
         function kiraHari(tarikh) {
@@ -367,7 +446,7 @@
                 gaya.teksWarna = 'text-rose-600';
                 gaya.bgWarna = 'bg-rose-50 border-rose-100';
                 gaya.statusBadge = '<span class="bg-rose-100 text-rose-700 px-3 py-1 rounded-full text-xs font-bold border border-rose-200">Telah Tamat</span>';
-                gaya.headerWarna = 'bg-gradient-to-r from-rose-400 to-red-500'; // Utk modal info
+                gaya.headerWarna = 'bg-gradient-to-r from-rose-400 to-red-500';
             } else if (hari <= 7) {
                 gaya.teksWarna = 'text-amber-600';
                 gaya.bgWarna = 'bg-amber-50 border-amber-100';
@@ -386,7 +465,7 @@
         function kemaskiniData() {
             let mTamat = 0, wTamat = 0, amaran = 0, aktif = 0;
             
-            pangkalanData.forEach(item => {
+            window.pangkalanData.forEach(item => {
                 let h = kiraHari(item.tarikh);
                 if (h < 0) {
                     item.jenis === 'Makanan' ? mTamat++ : wTamat++;
@@ -403,7 +482,7 @@
             const tiadaData = document.getElementById('tiada-data');
             tbody.innerHTML = '';
             
-            let dataView = tabSemasa === 'Semua' ? pangkalanData : pangkalanData.filter(i => i.jenis === tabSemasa);
+            let dataView = window.tabSemasa === 'Semua' ? window.pangkalanData : window.pangkalanData.filter(i => i.jenis === window.tabSemasa);
             
             // Susun: Paling kritikal (hari < 0) di atas, diikuti yang paling hampir tamat
             dataView.sort((a,b) => kiraHari(a.tarikh) - kiraHari(b.tarikh));
@@ -417,10 +496,11 @@
                     let gaya = dapatkanGaya(bakiHari, item.jenis);
                     let teksMasa = formatMasa(bakiHari);
                     
-                    // Baris jadual kini ada event onclick untuk buka modal info, 
-                    // kecuali pada butang padam (stopPropagation)
+                    // Gunakan ID pangkalan data awan jika ada, jika tiada guna ID lokal
+                    let targetId = item.dbId || item.id;
+                    
                     tbody.innerHTML += `
-                        <tr class="border-b border-slate-100 table-row-hover" onclick="bukaModalInfo(${item.id})">
+                        <tr class="border-b border-slate-100 table-row-hover" onclick="window.bukaModalInfo('${targetId}')">
                             <td class="px-4 sm:px-6 py-4 rounded-l-xl">
                                 <div class="flex items-center gap-4">
                                     <img src="${gaya.ikonUrl}" alt="${item.jenis}" class="ikon-imej bg-slate-50 rounded-lg p-1 border border-slate-100">
@@ -442,7 +522,7 @@
                                 </div>
                             </td>
                             <td class="px-4 sm:px-6 py-4 text-center rounded-r-xl">
-                                <button onclick="event.stopPropagation(); buang(${item.id})" class="h-10 w-10 rounded-full text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors flex items-center justify-center mx-auto" title="Padam">
+                                <button onclick="event.stopPropagation(); window.buang('${targetId}')" class="h-10 w-10 rounded-full text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors flex items-center justify-center mx-auto" title="Padam">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </td>
@@ -453,8 +533,8 @@
         }
 
         // Pengendalian Tab
-        function tukarTab(jenis) {
-            tabSemasa = jenis;
+        window.tukarTab = function(jenis) {
+            window.tabSemasa = jenis;
             document.querySelectorAll('.tab-btn').forEach(btn => {
                 btn.classList.remove('bg-white', 'text-slate-800', 'shadow-sm');
                 btn.classList.add('text-slate-500');
@@ -466,42 +546,64 @@
         }
 
         // Operasi CRUD
-        function simpanData(e) {
+        window.simpanData = async function(e) {
             e.preventDefault();
-            // Ambil jenis dari radio button yang dipilih
             const jenisTerpilih = document.querySelector('input[name="in-jenis"]:checked').value;
             const hariIniTxt = new Date().toISOString().split('T')[0];
 
-            pangkalanData.push({
-                id: Date.now(),
+            const rekodBaru = {
+                id: Date.now().toString(), // Backup lokal
                 nama: document.getElementById('in-nama').value,
                 jenis: jenisTerpilih,
                 tarikh: document.getElementById('in-tarikh').value,
                 nota: document.getElementById('in-nota').value,
                 daftar: hariIniTxt
-            });
-            tutupModalTambah();
+            };
+
+            // Simpan ke Firestore (Cloud) jika disambungkan
+            if (db && user) {
+                try {
+                    const colRef = collection(db, 'artifacts', appId, 'users', user.uid, 'myexpiry_items');
+                    await addDoc(colRef, rekodBaru);
+                } catch (error) {
+                    console.error("Gagal simpan ke awan:", error);
+                }
+            } else {
+                // Simpan lokal jika tidak online
+                window.pangkalanData.push(rekodBaru);
+                kemaskiniData();
+            }
+            
+            window.tutupModalTambah();
             document.getElementById('borang').reset();
-            kemaskiniData();
         }
 
-        function buang(id) {
-            pangkalanData = pangkalanData.filter(i => i.id !== id);
-            tutupModalInfo(); // Tutup modal info jika ia terbuka
-            kemaskiniData();
+        window.buang = async function(targetId) {
+            if (db && user) {
+                try {
+                    const docRef = doc(db, 'artifacts', appId, 'users', user.uid, 'myexpiry_items', targetId);
+                    await deleteDoc(docRef);
+                } catch (error) {
+                    console.error("Gagal padam dari awan:", error);
+                }
+            } else {
+                window.pangkalanData = window.pangkalanData.filter(i => (i.dbId || i.id) !== targetId);
+                kemaskiniData();
+            }
+            window.tutupModalInfo(); 
         }
 
         // Kawalan Modal Tambah
-        function bukaModalTambah() { 
+        window.bukaModalTambah = function() { 
             document.getElementById('modal-tambah').classList.replace('hidden', 'flex'); 
         }
-        function tutupModalTambah() { 
+        window.tutupModalTambah = function() { 
             document.getElementById('modal-tambah').classList.replace('flex', 'hidden'); 
         }
 
-        // Kawalan Modal Pop-up Maklumat (Fungsi Baru)
-        function bukaModalInfo(id) {
-            const item = pangkalanData.find(i => i.id === id);
+        // Kawalan Modal Pop-up Maklumat 
+        window.bukaModalInfo = function(targetId) {
+            const item = window.pangkalanData.find(i => (i.dbId || i.id) === targetId);
             if(!item) return;
 
             const bakiHari = kiraHari(item.tarikh);
@@ -518,7 +620,7 @@
             document.getElementById('info-nama').innerText = item.nama;
             document.getElementById('info-jenis').innerHTML = `<span class="bg-slate-100 px-2 py-0.5 rounded text-sm">${item.jenis}</span>`;
             
-            // Format Tarikh (Cth: 12 Jan 2024)
+            // Format Tarikh 
             const opsyenTarikh = { day: 'numeric', month: 'short', year: 'numeric' };
             document.getElementById('info-tarikh-daftar').innerText = new Date(item.daftar).toLocaleDateString('ms-MY', opsyenTarikh);
             document.getElementById('info-tarikh-sasaran').innerText = new Date(item.tarikh).toLocaleDateString('ms-MY', opsyenTarikh);
@@ -533,18 +635,15 @@
             document.getElementById('info-nota').innerText = item.nota || 'Tiada nota tambahan dimasukkan untuk item ini.';
 
             // Setup butang padam dalam modal
-            document.getElementById('btn-padam-info').onclick = function() { buang(item.id); };
+            document.getElementById('btn-padam-info').onclick = function() { window.buang(targetId); };
 
             // Tunjuk Modal
             document.getElementById('modal-info').classList.replace('hidden', 'flex');
         }
 
-        function tutupModalInfo() {
+        window.tutupModalInfo = function() {
             document.getElementById('modal-info').classList.replace('flex', 'hidden');
         }
-
-        // Mula Sistem
-        kemaskiniData();
 
     </script>
 </body>
