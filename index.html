@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OmniTrack - Sistem Pengurusan Tamat Tempoh & Waranti</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome untuk ikon am -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                fontFamily: {
+                    sans: ['Nunito', 'sans-serif'],
+                },
+                extend: {
+                    colors: {
+                        'brand-50': '#f0fdfa',
+                        'brand-500': '#14b8a6',
+                        'brand-600': '#0d9488',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #f8fafc; color: #334155; }
+        
+        /* Animasi */
+        .fade-in { animation: fadeIn 0.4s ease-out; }
+        .slide-up { animation: slideUp 0.3s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Gaya Kad Dashboard Berwarna */
+        .card-red { background: linear-gradient(135deg, #ff758c 0%, #ff7eb3 100%); color: white; box-shadow: 0 10px 15px -3px rgba(255, 117, 140, 0.3); }
+        .card-purple { background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%); color: white; box-shadow: 0 10px 15px -3px rgba(161, 140, 209, 0.3); }
+        .card-orange { background: linear-gradient(135deg, #f6d365 0%, #fda085 100%); color: white; box-shadow: 0 10px 15px -3px rgba(246, 211, 101, 0.3); }
+        .card-green { background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%); color: #0f172a; box-shadow: 0 10px 15px -3px rgba(132, 250, 176, 0.3); }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        /* Row Hover Effect */
+        .table-row-hover:hover { background-color: #f1f5f9; cursor: pointer; transform: scale(1.01); transition: all 0.2s; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+
+        /* Gaya Ikon Imej */
+        .ikon-imej {
+            width: 48px;
+            height: 48px;
+            object-fit: contain;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+            transition: transform 0.2s;
+        }
+        .table-row-hover:hover .ikon-imej {
+            transform: scale(1.1) rotate(5deg);
+        }
+        
+        .ikon-imej-besar {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+            filter: drop-shadow(0 6px 12px rgba(0,0,0,0.2));
+        }
+
+        .ikon-form {
+            width: 40px;
+            height: 40px;
+            object-fit: contain;
+            margin: 0 auto 8px auto;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased">
+
+    <!-- Navigasi Utama -->
+    <nav class="bg-white shadow-sm border-b border-slate-200 sticky top-0 z-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="bg-teal-50 text-teal-600 p-2 rounded-xl shadow-inner">
+                    <i class="fas fa-boxes-packing text-xl"></i>
+                </div>
+                <span class="font-extrabold text-2xl tracking-tight text-slate-800">Omni<span class="text-teal-600">Track</span></span>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="hidden sm:flex items-center bg-slate-100 rounded-full px-3 py-1.5">
+                    <i class="fas fa-search text-slate-400 text-sm"></i>
+                    <input type="text" placeholder="Cari item..." class="bg-transparent border-none focus:outline-none text-sm ml-2 text-slate-700 w-32">
+                </div>
+                <div class="h-9 w-9 rounded-full bg-teal-100 text-teal-700 flex items-center justify-center font-bold border border-teal-200 shadow-sm">
+                    A
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Kandungan Utama -->
+    <main class="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 py-8">
+        
+        <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+            <div>
+                <h1 class="text-3xl font-bold text-slate-800">Papan Pemuka Pintar</h1>
+                <p class="text-slate-500 mt-1 font-medium">Uruskan inventori makanan dan waranti anda dengan mudah.</p>
+            </div>
+            <button onclick="bukaModalTambah()" class="bg-teal-500 hover:bg-teal-600 text-white px-6 py-3 rounded-xl font-bold transition-all shadow-lg shadow-teal-500/30 flex items-center gap-2 transform hover:-translate-y-1">
+                <i class="fas fa-plus-circle text-lg"></i> Tambah Rekod Baru
+            </button>
+        </header>
+
+        <!-- Grid Statistik (Kad Berwarna) -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <!-- Kad Makanan Tamat -->
+            <div class="card-red rounded-2xl p-6 relative overflow-hidden fade-in">
+                <div class="absolute -right-4 -bottom-4 opacity-30">
+                    <img src="https://img.icons8.com/3d-fluency/100/delete-trash.png" alt="Tamat" class="w-32 h-32 object-contain opacity-50 grayscale">
+                </div>
+                <div class="relative z-10">
+                    <p class="font-semibold text-white/90 uppercase tracking-wider text-xs mb-1">Makanan Tamat Tempoh</p>
+                    <h2 class="text-5xl font-black mb-1" id="stat-makanan-tamat">0</h2>
+                    <p class="text-sm bg-white/20 inline-block px-3 py-1 rounded-full backdrop-blur-sm mt-2"><i class="fas fa-trash-can mr-1"></i> Sila lupuskan</p>
+                </div>
+            </div>
+
+            <!-- Kad Waranti Tamat -->
+            <div class="card-purple rounded-2xl p-6 relative overflow-hidden fade-in" style="animation-delay: 0.1s;">
+                <div class="absolute -right-4 -bottom-4 opacity-30">
+                    <img src="https://img.icons8.com/3d-fluency/100/cancel.png" alt="Tiada Waranti" class="w-32 h-32 object-contain opacity-50 grayscale">
+                </div>
+                <div class="relative z-10">
+                    <p class="font-semibold text-white/90 uppercase tracking-wider text-xs mb-1">Waranti Produk Tamat</p>
+                    <h2 class="text-5xl font-black mb-1" id="stat-waranti-tamat">0</h2>
+                    <p class="text-sm bg-white/20 inline-block px-3 py-1 rounded-full backdrop-blur-sm mt-2"><i class="fas fa-ban mr-1"></i> Tiada perlindungan</p>
+                </div>
+            </div>
+
+            <!-- Kad Hampir Tamat -->
+            <div class="card-orange rounded-2xl p-6 relative overflow-hidden fade-in" style="animation-delay: 0.2s;">
+                <div class="absolute -right-4 -bottom-4 opacity-20"><i class="fas fa-hourglass-half text-8xl"></i></div>
+                <div class="relative z-10">
+                    <p class="font-semibold text-white/90 uppercase tracking-wider text-xs mb-1">Amaran (Hampir Tamat)</p>
+                    <h2 class="text-5xl font-black mb-1" id="stat-amaran">0</h2>
+                    <p class="text-sm bg-white/20 inline-block px-3 py-1 rounded-full backdrop-blur-sm mt-2"><i class="fas fa-bell mr-1"></i> ≤ 7 Hari lagi</p>
+                </div>
+            </div>
+
+            <!-- Kad Aktif -->
+            <div class="card-green rounded-2xl p-6 relative overflow-hidden fade-in" style="animation-delay: 0.3s;">
+                <div class="absolute -right-4 -bottom-4 opacity-10"><i class="fas fa-check-double text-8xl"></i></div>
+                <div class="relative z-10">
+                    <p class="font-semibold text-slate-700/80 uppercase tracking-wider text-xs mb-1">Total Item Aktif</p>
+                    <h2 class="text-5xl font-black mb-1 text-slate-800" id="stat-aktif">0</h2>
+                    <p class="text-sm bg-white/30 text-slate-800 inline-block px-3 py-1 rounded-full backdrop-blur-sm mt-2"><i class="fas fa-shield-halved mr-1"></i> Selamat digunakan</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bahagian Jadual dengan Tab -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden fade-in" style="animation-delay: 0.4s;">
+            <div class="p-4 sm:p-5 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-center bg-slate-50 gap-4">
+                <h3 class="font-bold text-slate-800 text-lg flex items-center gap-2">
+                    <i class="fas fa-list-check text-teal-500"></i> Log Inventori & Waranti
+                </h3>
+                
+                <!-- Tab Navigasi -->
+                <div class="flex bg-slate-200/50 rounded-xl p-1 shadow-inner w-full sm:w-auto">
+                    <button onclick="tukarTab('Semua')" id="tab-Semua" class="tab-btn flex-1 sm:flex-none px-6 py-2 text-sm rounded-lg bg-white text-slate-800 font-bold shadow-sm transition-all">Semua</button>
+                    <button onclick="tukarTab('Makanan')" id="tab-Makanan" class="tab-btn flex-1 sm:flex-none px-6 py-2 text-sm rounded-lg text-slate-500 hover:text-slate-700 font-semibold transition-all">Makanan</button>
+                    <button onclick="tukarTab('Waranti')" id="tab-Waranti" class="tab-btn flex-1 sm:flex-none px-6 py-2 text-sm rounded-lg text-slate-500 hover:text-slate-700 font-semibold transition-all">Waranti</button>
+                </div>
+            </div>
+            
+            <div class="overflow-x-auto p-2">
+                <table class="w-full text-sm text-left border-collapse">
+                    <thead class="text-xs text-slate-500 uppercase bg-slate-50 rounded-lg">
+                        <tr>
+                            <th class="px-6 py-4 font-bold rounded-tl-lg">Maklumat Item</th>
+                            <th class="px-6 py-4 font-bold">Kategori</th>
+                            <th class="px-6 py-4 font-bold">Tarikh Sasaran</th>
+                            <th class="px-6 py-4 font-bold">Baki Masa</th>
+                            <th class="px-6 py-4 font-bold text-center rounded-tr-lg">Tindakan</th>
+                        </tr>
+                    </thead>
+                    <tbody id="senarai-jadual" class="divide-y divide-slate-100">
+                        <!-- Data dimasukkan via JS -->
+                    </tbody>
+                </table>
+                <div id="tiada-data" class="hidden text-center py-12">
+                    <div class="text-slate-300 mb-4">
+                        <img src="https://img.icons8.com/3d-fluency/100/box.png" alt="Kosong" class="w-32 h-32 object-contain mx-auto opacity-50 grayscale">
+                    </div>
+                    <p class="text-slate-500 font-medium text-lg">Tiada rekod ditemui untuk kategori ini.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- ================= MODAL & POP-UP ================= -->
+
+    <!-- 1. Modal Tambah Item -->
+    <div id="modal-tambah" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm hidden items-center justify-center z-50 transition-opacity">
+        <div class="bg-white rounded-3xl w-full max-w-md mx-4 shadow-2xl overflow-hidden slide-up">
+            <div class="bg-gradient-to-r from-teal-500 to-emerald-500 p-6 text-white text-center">
+                <h3 class="font-bold text-2xl mb-1">Daftar Item Baru</h3>
+                <p class="text-teal-50 text-sm">Masukkan butiran untuk pemantauan.</p>
+            </div>
+            <form id="borang" class="p-6 sm:p-8" onsubmit="simpanData(event)">
+                <div class="space-y-5">
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-2">Nama Produk / Item</label>
+                        <div class="relative">
+                            <i class="fas fa-tag absolute left-4 top-3.5 text-slate-400"></i>
+                            <input type="text" id="in-nama" required class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-11 pr-4 py-3 text-slate-700 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition-all font-medium" placeholder="Contoh: Roti Putih / TV Samsung">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-2">Kategori</label>
+                        <div class="grid grid-cols-2 gap-3">
+                            <label class="cursor-pointer">
+                                <input type="radio" name="in-jenis" value="Makanan" class="peer sr-only" checked>
+                                <div class="rounded-xl border-2 border-slate-200 p-3 text-center peer-checked:border-teal-500 peer-checked:bg-teal-50 transition-all flex flex-col items-center justify-center">
+                                    <img src="https://img.icons8.com/3d-fluency/100/hamburger.png" alt="Makanan" class="ikon-form">
+                                    <div class="font-bold text-sm text-slate-700">Makanan</div>
+                                </div>
+                            </label>
+                            <label class="cursor-pointer">
+                                <input type="radio" name="in-jenis" value="Waranti" class="peer sr-only">
+                                <div class="rounded-xl border-2 border-slate-200 p-3 text-center peer-checked:border-teal-500 peer-checked:bg-teal-50 transition-all flex flex-col items-center justify-center">
+                                    <img src="https://img.icons8.com/3d-fluency/100/laptop.png" alt="Waranti" class="ikon-form">
+                                    <div class="font-bold text-sm text-slate-700">Waranti</div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-2">Tarikh Luput / Tamat</label>
+                        <div class="relative">
+                            <input type="date" id="in-tarikh" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-700 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition-all font-medium font-sans">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-2">Nota / Lokasi (Pilihan)</label>
+                        <input type="text" id="in-nota" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-700 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition-all font-medium" placeholder="Cth: Peti ais bawah, Laci meja...">
+                    </div>
+                </div>
+                <div class="mt-8 flex gap-3">
+                    <button type="button" onclick="tutupModalTambah()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-3.5 rounded-xl transition-colors">Batal</button>
+                    <button type="submit" class="flex-[2] bg-teal-500 hover:bg-teal-600 text-white font-bold py-3.5 rounded-xl transition-all shadow-lg shadow-teal-500/30">Simpan Rekod</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 2. Modal Pop-up Maklumat Terperinci Item -->
+    <div id="modal-info" class="fixed inset-0 bg-slate-900/60 backdrop-blur-md hidden items-center justify-center z-50 transition-opacity">
+        <div class="bg-white rounded-3xl w-full max-w-md mx-4 shadow-2xl overflow-hidden slide-up relative">
+            
+            <!-- Bahagian Header Modal Info -->
+            <div id="info-header" class="h-32 bg-slate-200 relative flex items-center justify-center">
+                <button onclick="tutupModalInfo()" class="absolute top-4 right-4 h-8 w-8 bg-black/20 hover:bg-black/40 text-white rounded-full flex items-center justify-center backdrop-blur-sm transition-colors">
+                    <i class="fas fa-times"></i>
+                </button>
+                <!-- Ikon Besar Ditengah -->
+                <div id="info-ikon-besar" class="h-24 w-24 bg-white rounded-full shadow-lg absolute -bottom-12 flex items-center justify-center border-4 border-white z-10 p-2">
+                    <!-- Ikon akan dimasukkan di sini via JS -->
+                </div>
+            </div>
+
+            <!-- Kandungan Maklumat -->
+            <div class="pt-16 pb-8 px-8 text-center relative z-0">
+                <div id="info-status-badge" class="absolute top-4 right-6 text-xs font-bold px-3 py-1 rounded-full">Status</div>
+                
+                <h2 id="info-nama" class="text-2xl font-black text-slate-800 mb-1">Nama Item</h2>
+                <p id="info-jenis" class="text-slate-500 font-semibold mb-6 flex items-center justify-center gap-2">Jenis</p>
+
+                <div class="bg-slate-50 rounded-2xl p-5 text-left border border-slate-100 mb-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <span class="text-slate-500 font-bold text-sm">Tarikh Didaftar:</span>
+                        <span id="info-tarikh-daftar" class="text-slate-800 font-semibold">1 Jan 2024</span>
+                    </div>
+                    <div class="flex justify-between items-center mb-4">
+                        <span class="text-slate-500 font-bold text-sm">Tarikh Sasaran:</span>
+                        <span id="info-tarikh-sasaran" class="text-slate-800 font-black text-lg">31 Dis 2024</span>
+                    </div>
+                    <div class="w-full h-px bg-slate-200 my-4"></div>
+                    <div class="flex flex-col">
+                        <span class="text-slate-500 font-bold text-sm mb-1">Baki Masa Terkini:</span>
+                        <span id="info-baki-masa" class="text-xl font-black">Tinggal X Hari</span>
+                    </div>
+                </div>
+
+                <div class="text-left bg-blue-50/50 p-4 rounded-xl border border-blue-100">
+                    <p class="text-slate-500 font-bold text-xs uppercase mb-1">Nota / Lokasi</p>
+                    <p id="info-nota" class="text-slate-700 font-medium">Tiada nota dimasukkan.</p>
+                </div>
+                
+                <div class="mt-6 flex gap-3">
+                    <button onclick="tutupModalInfo()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 rounded-xl transition-colors">Tutup</button>
+                    <!-- Butang Padam Dari Dalam Modal Info -->
+                    <button id="btn-padam-info" class="flex-1 bg-red-50 hover:bg-red-100 text-red-600 font-bold py-3 rounded-xl transition-colors border border-red-200 flex items-center justify-center gap-2">
+                        <i class="fas fa-trash-can"></i> Padam Rekod
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= SCRIPT LOGIK SISTEM ================= -->
+    <script>
+        // Data Mockup (Termasuk tarikh pendaftaran & nota)
+        const t = (h) => { let d = new Date(); d.setDate(d.getDate() + h); return d.toISOString().split('T')[0]; };
+        
+        // URL Ikon 3D Baharu (Menggunakan API stabil dari Icons8)
+        const ikonMakanan = "https://img.icons8.com/3d-fluency/100/hamburger.png";
+        const ikonWaranti = "https://img.icons8.com/3d-fluency/100/laptop.png";
+        const ikonMakananTamat = "https://img.icons8.com/3d-fluency/100/delete-trash.png"; // Ikon tong sampah untuk makanan rosak
+        const ikonWarantiTamat = "https://img.icons8.com/3d-fluency/100/cancel.png";    // Ikon pangkah untuk waranti tamat
+
+        let pangkalanData = [
+            { id: 1, nama: 'Susu UHT Full Cream', jenis: 'Makanan', tarikh: t(-2), daftar: t(-30), nota: 'Dalam pantri kabinet atas' },
+            { id: 2, nama: 'Mesin Basuh Automatik LG', jenis: 'Waranti', tarikh: t(-10), daftar: t(-400), nota: 'Resit dalam fail hijau' },
+            { id: 3, nama: 'Roti Gandum Penuh', jenis: 'Makanan', tarikh: t(3), daftar: t(-3), nota: 'Atas meja makan' },
+            { id: 4, nama: 'Penyaman Udara Daikin', jenis: 'Waranti', tarikh: t(5), daftar: t(-360), nota: 'Waranti pengeluar 1 tahun' },
+            { id: 5, nama: 'Ubat Paracetamol', jenis: 'Makanan', tarikh: t(45), daftar: t(-10), nota: 'Peti kecemasan' },
+            { id: 6, nama: 'Telefon Pintar Galaxy', jenis: 'Waranti', tarikh: t(120), daftar: t(-245), nota: 'Beli di kedai rasmi' }
+        ];
+
+        let tabSemasa = 'Semua';
+
+        // Fungsi Mengira Hari
+        function kiraHari(tarikh) {
+            const sasaran = new Date(tarikh); sasaran.setHours(0,0,0,0);
+            const mula = new Date(); mula.setHours(0,0,0,0);
+            return Math.ceil((sasaran.getTime() - mula.getTime()) / (1000 * 60 * 60 * 24));
+        }
+
+        // Format Teks Masa
+        function formatMasa(hari) {
+            if (hari < 0) return `Tamat ${Math.abs(hari)} hari lepas`;
+            if (hari === 0) return `Tamat Hari Ini`;
+            
+            if (hari > 30) {
+                let bulan = Math.floor(hari / 30);
+                let baki = hari % 30;
+                return baki > 0 ? `${bulan} bln, ${baki} hari lagi` : `${bulan} bulan lagi`;
+            }
+            return `${hari} hari lagi`;
+        }
+
+        // Dapatkan Gaya (Warna & Ikon) berdasarkan hari dan jenis
+        function dapatkanGaya(hari, jenis) {
+            let gaya = { bgWarna: '', teksWarna: '', ikonUrl: '', statusBadge: '' };
+            
+            if (jenis === 'Makanan') {
+                gaya.ikonUrl = hari < 0 ? ikonMakananTamat : ikonMakanan;
+            } else {
+                gaya.ikonUrl = hari < 0 ? ikonWarantiTamat : ikonWaranti;
+            }
+
+            if (hari < 0) {
+                gaya.teksWarna = 'text-rose-600';
+                gaya.bgWarna = 'bg-rose-50 border-rose-100';
+                gaya.statusBadge = '<span class="bg-rose-100 text-rose-700 px-3 py-1 rounded-full text-xs font-bold border border-rose-200">Telah Tamat</span>';
+                gaya.headerWarna = 'bg-gradient-to-r from-rose-400 to-red-500'; // Utk modal info
+            } else if (hari <= 7) {
+                gaya.teksWarna = 'text-amber-600';
+                gaya.bgWarna = 'bg-amber-50 border-amber-100';
+                gaya.statusBadge = '<span class="bg-amber-100 text-amber-700 px-3 py-1 rounded-full text-xs font-bold border border-amber-200">Kritikal</span>';
+                gaya.headerWarna = 'bg-gradient-to-r from-amber-400 to-orange-500';
+            } else {
+                gaya.teksWarna = 'text-slate-600';
+                gaya.bgWarna = 'bg-emerald-50 border-emerald-100';
+                gaya.statusBadge = '<span class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-xs font-bold border border-emerald-200">Aktif</span>';
+                gaya.headerWarna = 'bg-gradient-to-r from-teal-400 to-emerald-500';
+            }
+            return gaya;
+        }
+
+        // Render Antaramuka Utama (Dashboard & Jadual)
+        function kemaskiniData() {
+            let mTamat = 0, wTamat = 0, amaran = 0, aktif = 0;
+            
+            pangkalanData.forEach(item => {
+                let h = kiraHari(item.tarikh);
+                if (h < 0) {
+                    item.jenis === 'Makanan' ? mTamat++ : wTamat++;
+                } else if (h <= 7) { amaran++; } 
+                else { aktif++; }
+            });
+
+            document.getElementById('stat-makanan-tamat').innerText = mTamat;
+            document.getElementById('stat-waranti-tamat').innerText = wTamat;
+            document.getElementById('stat-amaran').innerText = amaran;
+            document.getElementById('stat-aktif').innerText = aktif;
+
+            const tbody = document.getElementById('senarai-jadual');
+            const tiadaData = document.getElementById('tiada-data');
+            tbody.innerHTML = '';
+            
+            let dataView = tabSemasa === 'Semua' ? pangkalanData : pangkalanData.filter(i => i.jenis === tabSemasa);
+            
+            // Susun: Paling kritikal (hari < 0) di atas, diikuti yang paling hampir tamat
+            dataView.sort((a,b) => kiraHari(a.tarikh) - kiraHari(b.tarikh));
+
+            if(dataView.length === 0) {
+                tiadaData.classList.remove('hidden');
+            } else {
+                tiadaData.classList.add('hidden');
+                dataView.forEach(item => {
+                    let bakiHari = kiraHari(item.tarikh);
+                    let gaya = dapatkanGaya(bakiHari, item.jenis);
+                    let teksMasa = formatMasa(bakiHari);
+                    
+                    // Baris jadual kini ada event onclick untuk buka modal info, 
+                    // kecuali pada butang padam (stopPropagation)
+                    tbody.innerHTML += `
+                        <tr class="border-b border-slate-100 table-row-hover" onclick="bukaModalInfo(${item.id})">
+                            <td class="px-4 sm:px-6 py-4 rounded-l-xl">
+                                <div class="flex items-center gap-4">
+                                    <img src="${gaya.ikonUrl}" alt="${item.jenis}" class="ikon-imej bg-slate-50 rounded-lg p-1 border border-slate-100">
+                                    <div>
+                                        <p class="font-extrabold text-slate-800 text-base">${item.nama}</p>
+                                        <div class="hidden sm:block text-xs text-slate-500 mt-0.5 truncate w-32 md:w-auto">${item.nota || 'Tiada nota'}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-4 sm:px-6 py-4">
+                                <span class="font-bold text-slate-600 bg-slate-100 px-3 py-1 rounded-lg text-xs">${item.jenis}</span>
+                            </td>
+                            <td class="px-4 sm:px-6 py-4 font-semibold text-slate-600">
+                                ${new Date(item.tarikh).toLocaleDateString('ms-MY', { day: 'numeric', month: 'short', year: 'numeric' })}
+                            </td>
+                            <td class="px-4 sm:px-6 py-4">
+                                <div class="${gaya.bgWarna} border px-3 py-2 rounded-xl inline-flex items-center gap-2 min-w-[120px]">
+                                    <span class="font-black ${gaya.teksWarna}">${teksMasa}</span>
+                                </div>
+                            </td>
+                            <td class="px-4 sm:px-6 py-4 text-center rounded-r-xl">
+                                <button onclick="event.stopPropagation(); buang(${item.id})" class="h-10 w-10 rounded-full text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors flex items-center justify-center mx-auto" title="Padam">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            }
+        }
+
+        // Pengendalian Tab
+        function tukarTab(jenis) {
+            tabSemasa = jenis;
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('bg-white', 'text-slate-800', 'shadow-sm');
+                btn.classList.add('text-slate-500');
+            });
+            let aktifBtn = document.getElementById('tab-' + jenis);
+            aktifBtn.classList.remove('text-slate-500');
+            aktifBtn.classList.add('bg-white', 'text-slate-800', 'shadow-sm');
+            kemaskiniData();
+        }
+
+        // Operasi CRUD
+        function simpanData(e) {
+            e.preventDefault();
+            // Ambil jenis dari radio button yang dipilih
+            const jenisTerpilih = document.querySelector('input[name="in-jenis"]:checked').value;
+            const hariIniTxt = new Date().toISOString().split('T')[0];
+
+            pangkalanData.push({
+                id: Date.now(),
+                nama: document.getElementById('in-nama').value,
+                jenis: jenisTerpilih,
+                tarikh: document.getElementById('in-tarikh').value,
+                nota: document.getElementById('in-nota').value,
+                daftar: hariIniTxt
+            });
+            tutupModalTambah();
+            document.getElementById('borang').reset();
+            kemaskiniData();
+        }
+
+        function buang(id) {
+            pangkalanData = pangkalanData.filter(i => i.id !== id);
+            tutupModalInfo(); // Tutup modal info jika ia terbuka
+            kemaskiniData();
+        }
+
+        // Kawalan Modal Tambah
+        function bukaModalTambah() { 
+            document.getElementById('modal-tambah').classList.replace('hidden', 'flex'); 
+        }
+        function tutupModalTambah() { 
+            document.getElementById('modal-tambah').classList.replace('flex', 'hidden'); 
+        }
+
+        // Kawalan Modal Pop-up Maklumat (Fungsi Baru)
+        function bukaModalInfo(id) {
+            const item = pangkalanData.find(i => i.id === id);
+            if(!item) return;
+
+            const bakiHari = kiraHari(item.tarikh);
+            const gaya = dapatkanGaya(bakiHari, item.jenis);
+
+            // Set Header Warna
+            const header = document.getElementById('info-header');
+            header.className = `h-32 relative flex items-center justify-center transition-colors ${gaya.headerWarna}`;
+
+            // Set Ikon
+            document.getElementById('info-ikon-besar').innerHTML = `<img src="${gaya.ikonUrl}" alt="${item.jenis}" class="ikon-imej-besar">`;
+
+            // Set Maklumat Teks
+            document.getElementById('info-nama').innerText = item.nama;
+            document.getElementById('info-jenis').innerHTML = `<span class="bg-slate-100 px-2 py-0.5 rounded text-sm">${item.jenis}</span>`;
+            
+            // Format Tarikh (Cth: 12 Jan 2024)
+            const opsyenTarikh = { day: 'numeric', month: 'short', year: 'numeric' };
+            document.getElementById('info-tarikh-daftar').innerText = new Date(item.daftar).toLocaleDateString('ms-MY', opsyenTarikh);
+            document.getElementById('info-tarikh-sasaran').innerText = new Date(item.tarikh).toLocaleDateString('ms-MY', opsyenTarikh);
+            
+            // Set Baki Masa & Status
+            const elmBaki = document.getElementById('info-baki-masa');
+            elmBaki.innerText = formatMasa(bakiHari);
+            elmBaki.className = `text-2xl font-black ${gaya.teksWarna}`;
+            document.getElementById('info-status-badge').outerHTML = gaya.statusBadge.replace('<span', '<div id="info-status-badge" class="absolute top-4 right-6 shadow-sm"').replace('</span>', '</div>');
+            
+            // Set Nota
+            document.getElementById('info-nota').innerText = item.nota || 'Tiada nota tambahan dimasukkan untuk item ini.';
+
+            // Setup butang padam dalam modal
+            document.getElementById('btn-padam-info').onclick = function() { buang(item.id); };
+
+            // Tunjuk Modal
+            document.getElementById('modal-info').classList.replace('hidden', 'flex');
+        }
+
+        function tutupModalInfo() {
+            document.getElementById('modal-info').classList.replace('flex', 'hidden');
+        }
+
+        // Mula Sistem
+        kemaskiniData();
+
+    </script>
+</body>
+</html>
