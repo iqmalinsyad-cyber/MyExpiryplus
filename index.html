@@ -126,13 +126,37 @@
                 <img src="https://lh3.googleusercontent.com/d/1FjDbZbvpm6mNqef6ApAP8QJaS3CskOqw" alt="Logo MyExpiry+" class="w-10 h-10 object-contain drop-shadow-sm">
                 <span class="font-extrabold text-2xl tracking-tight text-slate-800">MyExpiry<span class="text-teal-600">+</span></span>
             </div>
+            
             <div class="flex items-center gap-4">
-                <div class="hidden sm:flex items-center bg-slate-100 rounded-full px-3 py-1.5">
+                <div class="hidden md:flex items-center bg-slate-100 rounded-full px-3 py-1.5 mr-2">
                     <i class="fas fa-search text-slate-400 text-sm"></i>
                     <input type="text" placeholder="Cari item..." class="bg-transparent border-none focus:outline-none text-sm ml-2 text-slate-700 w-32">
                 </div>
-                <div class="h-9 w-9 rounded-full bg-teal-100 text-teal-700 flex items-center justify-center font-bold border border-teal-200 shadow-sm">
-                    A
+                
+                <!-- Bahagian Log Masuk / Profil Pengguna -->
+                <div id="auth-container" class="flex items-center">
+                    <!-- Butang Log Masuk Google (Disembunyikan pada asalnya) -->
+                    <button id="btn-login" onclick="window.loginGoogle()" class="hidden bg-white text-teal-600 border border-teal-200 hover:bg-teal-50 px-4 py-1.5 rounded-full text-sm font-bold shadow-sm transition-colors flex items-center gap-2">
+                        <img src="https://img.icons8.com/color/48/google-logo.png" alt="Google" class="w-4 h-4"> Log Masuk
+                    </button>
+
+                    <!-- Profil Pengguna Aktif -->
+                    <div id="user-profile" class="hidden items-center gap-3">
+                        <span id="user-name" class="text-sm font-bold text-slate-700 hidden sm:block">Memuatkan...</span>
+                        
+                        <!-- Gambar Google Profile Jika Ada -->
+                        <img id="user-pic" src="" alt="Profile" class="h-9 w-9 rounded-full border-2 border-teal-200 shadow-sm object-cover hidden">
+                        
+                        <!-- Ikon Tetamu / Inisial Default -->
+                        <div id="user-initial" class="h-9 w-9 rounded-full bg-teal-100 text-teal-700 flex items-center justify-center font-bold border border-teal-200 shadow-sm">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        
+                        <!-- Butang Log Keluar -->
+                        <button onclick="window.logoutGoogle()" class="text-slate-400 hover:text-red-500 transition-colors ml-1 p-2 rounded-full hover:bg-red-50" title="Log Keluar">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -348,10 +372,23 @@
         </div>
     </div>
 
-    <!-- ================= SCRIPT LOGIK SISTEM (REAL-TIME FIREBASE) ================= -->
+    <!-- Modal Amaran Iframe Custom (Bila Log Masuk Google Disekat di Canvas) -->
+    <div id="modal-amaran" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-[60] transition-opacity">
+        <div class="bg-white rounded-2xl w-full max-w-sm mx-4 p-6 shadow-2xl text-center">
+            <div class="h-16 w-16 bg-amber-100 text-amber-500 rounded-full flex items-center justify-center text-3xl mx-auto mb-4">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <h3 class="font-bold text-xl text-slate-800 mb-2">Pop-up Disekat</h3>
+            <p class="text-slate-600 text-sm mb-6">Log masuk Google biasanya disekat di dalam paparan tetingkap <i>iframe</i> atas faktor keselamatan browser.</p>
+            <p class="text-slate-600 text-sm mb-6 font-bold">Sila host/publish fail ini di server luaran (Netlify/Firebase) untuk menikmati fungsi Log Masuk Google sepenuhnya.</p>
+            <button onclick="document.getElementById('modal-amaran').classList.replace('flex', 'hidden')" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 rounded-xl transition-colors">Faham</button>
+        </div>
+    </div>
+
+    <!-- ================= SCRIPT LOGIK SISTEM (REAL-TIME FIREBASE + GOOGLE AUTH) ================= -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // URL Ikon 3D
@@ -361,15 +398,62 @@
         const ikonWarantiTamat = "https://img.icons8.com/3d-fluency/100/cancel.png";    
 
         // Pengurusan State Awalan 
-        // Dikosongkan untuk data real-time, tiada lagi 'mock data'
         window.pangkalanData = []; 
         window.tabSemasa = 'Semua';
         
-        let app, auth, db, user;
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+        // =========================================================================
+        // PENTING: KONFIGURASI FIREBASE ANDA SENDIRI (UNTUK SYNC DI MANA-MANA)
+        // =========================================================================
+        const myFirebaseConfig = {
+            apiKey: "SILA_LETAK_API_KEY_ANDA",
+            authDomain: "SILA_LETAK_AUTH_DOMAIN_ANDA",
+            projectId: "SILA_LETAK_PROJECT_ID_ANDA",
+            storageBucket: "SILA_LETAK_STORAGE_BUCKET_ANDA",
+            messagingSenderId: "SILA_LETAK_MESSAGING_SENDER_ID_ANDA",
+            appId: "SILA_LETAK_APP_ID_ANDA"
+        };
+        // =========================================================================
 
-        // Inisialisasi Firebase jika berada dalam persekitaran yang betul
+        let app, auth, db, user;
+        let unsubscribeSnapshot = null; // Menyimpan rujukan onSnapshot
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'myexpiry-peribadi';
+        
+        const firebaseConfig = typeof __firebase_config !== 'undefined' 
+            ? JSON.parse(__firebase_config) 
+            : (myFirebaseConfig.apiKey !== "SILA_LETAK_API_KEY_ANDA" ? myFirebaseConfig : null);
+
+        // Kawalan UI Profil & Login
+        const updateAuthUI = (u) => {
+            const btnLogin = document.getElementById('btn-login');
+            const profileArea = document.getElementById('user-profile');
+            const userName = document.getElementById('user-name');
+            const userPic = document.getElementById('user-pic');
+            const userInitial = document.getElementById('user-initial');
+
+            if (u && !u.isAnonymous) {
+                // Berjaya Log Masuk Google
+                btnLogin.classList.add('hidden');
+                profileArea.classList.replace('hidden', 'flex');
+                userName.innerText = u.displayName || "Pengguna";
+                
+                if (u.photoURL) {
+                    userPic.src = u.photoURL;
+                    userPic.classList.remove('hidden');
+                    userInitial.classList.add('hidden');
+                } else {
+                    userPic.classList.add('hidden');
+                    userInitial.classList.remove('hidden');
+                }
+            } else {
+                // Anonymous Log In (Tetamu) ATAU Tiada Akaun
+                btnLogin.classList.remove('hidden');
+                profileArea.classList.replace('hidden', 'flex'); // Boleh hide ini jika tak nak tunjuk langsung, tapi elok tunjuk sbg 'Tetamu'
+                userName.innerText = "Tetamu (Lokal)";
+                userPic.classList.add('hidden');
+                userInitial.classList.remove('hidden');
+            }
+        };
+
         if (firebaseConfig) {
             app = initializeApp(firebaseConfig);
             auth = getAuth(app);
@@ -385,23 +469,56 @@
             initAuth();
 
             onAuthStateChanged(auth, (u) => {
+                user = u;
+                updateAuthUI(u);
+                
                 if (u) {
-                    user = u;
                     muatTurunDataRealtime();
                 } else {
-                    user = null;
+                    // Jika ter-log out, bersihkan data paparan
+                    if(unsubscribeSnapshot) unsubscribeSnapshot();
+                    window.pangkalanData = [];
+                    kemaskiniData();
                 }
             });
+            
+            // FUNGSI GOOGLE AUTH
+            const provider = new GoogleAuthProvider();
+            
+            window.loginGoogle = async () => {
+                try {
+                    await signInWithPopup(auth, provider);
+                } catch (error) {
+                    console.error("Ralat Google Auth:", error);
+                    // Tunjuk alert custom jika error (biasanya error iframe block di preview web)
+                    document.getElementById('modal-amaran').classList.replace('hidden', 'flex');
+                }
+            };
+
+            window.logoutGoogle = async () => {
+                try {
+                    await signOut(auth);
+                    // Selepas logout, login kembali sbg tetamu supaya app masih boleh dipakai lokal
+                    await signInAnonymously(auth);
+                } catch (error) {
+                    console.error("Ralat Log Keluar:", error);
+                }
+            };
+
         } else {
-            // Berfungsi sebagai memori setempat (local) jika fail dibuka di luar
+            console.warn("Firebase belum dikonfigurasi.");
+            updateAuthUI(null);
             kemaskiniData();
         }
 
         function muatTurunDataRealtime() {
             if (!user) return;
+            // Padam listener lama jika ada (elak duplicate data bila tukar akaun)
+            if (unsubscribeSnapshot) unsubscribeSnapshot();
+
             const colRef = collection(db, 'artifacts', appId, 'users', user.uid, 'myexpiry_items');
             
-            onSnapshot(colRef, (snapshot) => {
+            unsubscribeSnapshot = onSnapshot(colRef, (snapshot) => {
                 window.pangkalanData = [];
                 snapshot.forEach(doc => {
                     window.pangkalanData.push({ dbId: doc.id, ...doc.data() });
