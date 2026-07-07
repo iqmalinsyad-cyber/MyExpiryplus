@@ -378,9 +378,8 @@
             <div class="h-16 w-16 bg-amber-100 text-amber-500 rounded-full flex items-center justify-center text-3xl mx-auto mb-4">
                 <i class="fas fa-exclamation-triangle"></i>
             </div>
-            <h3 class="font-bold text-xl text-slate-800 mb-2">Pop-up Disekat</h3>
-            <p class="text-slate-600 text-sm mb-6">Log masuk Google biasanya disekat di dalam paparan tetingkap <i>iframe</i> atas faktor keselamatan browser.</p>
-            <p class="text-slate-600 text-sm mb-6 font-bold">Sila host/publish fail ini di server luaran (Netlify/Firebase) untuk menikmati fungsi Log Masuk Google sepenuhnya.</p>
+            <h3 class="font-bold text-xl text-slate-800 mb-2">Peringatan Awan</h3>
+            <p class="text-slate-600 text-sm mb-6">Log masuk awan disekat/tidak dikonfigurasi dengan betul. <br><br><b>Sila masukkan kod API Key Firebase yang sah</b> di dalam fail untuk menghidupkan fungsi ini.</p>
             <button onclick="document.getElementById('modal-amaran').classList.replace('flex', 'hidden')" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 rounded-xl transition-colors">Faham</button>
         </div>
     </div>
@@ -397,30 +396,142 @@
         const ikonMakananTamat = "https://img.icons8.com/3d-fluency/100/delete-trash.png"; 
         const ikonWarantiTamat = "https://img.icons8.com/3d-fluency/100/cancel.png";    
 
-        // Pengurusan State Awalan 
-        window.pangkalanData = []; 
+        // =========================================================================
+        // 1. SETUP MEMORI LOKAL SEBAGAI SANDARAN (FALLBACK)
+        // =========================================================================
+        window.pangkalanData = JSON.parse(localStorage.getItem('myexpiry_data')) || []; 
         window.tabSemasa = 'Semua';
-        
-        // =========================================================================
-        // PENTING: KONFIGURASI FIREBASE ANDA SENDIRI (UNTUK SYNC DI MANA-MANA)
-        // =========================================================================
-        const firebaseConfig = {
-          apiKey: "AIzaSyDoqzlqifrHbbBYviaYGhQh-QUoFqRw6Iw",
-          authDomain: "docuvault-v2.firebaseapp.com",
-          projectId: "docuvault-v2",
-          storageBucket: "docuvault-v2.firebasestorage.app",
-          messagingSenderId: "734492192690",
-          appId: "1:734492192690:web:4c9529d6818319f76b3eab"
-        };
-        // =========================================================================
 
+        // =========================================================================
+        // 2. PENDAFTARAN FUNGSI UI / BUTANG DI AWAL KOD AGAR SENTIASA BERFUNGSI
+        // =========================================================================
+        
+        // Pengendalian Tab
+        window.tukarTab = function(jenis) {
+            window.tabSemasa = jenis;
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('bg-white', 'text-slate-800', 'shadow-sm');
+                btn.classList.add('text-slate-500');
+            });
+            let aktifBtn = document.getElementById('tab-' + jenis);
+            aktifBtn.classList.remove('text-slate-500');
+            aktifBtn.classList.add('bg-white', 'text-slate-800', 'shadow-sm');
+            kemaskiniData();
+        }
+
+        // Operasi Simpan Data Baru
+        window.simpanData = async function(e) {
+            e.preventDefault();
+            const jenisTerpilih = document.querySelector('input[name="in-jenis"]:checked').value;
+            const hariIniTxt = new Date().toISOString().split('T')[0];
+
+            const rekodBaru = {
+                id: Date.now().toString(), // ID Lokal Backup
+                nama: document.getElementById('in-nama').value,
+                jenis: jenisTerpilih,
+                tarikh: document.getElementById('in-tarikh').value,
+                nota: document.getElementById('in-nota').value,
+                daftar: hariIniTxt
+            };
+
+            // Simpan ke Firestore (Cloud) jika disambungkan, jika gagal/tiada cloud -> simpan lokal
+            if (db && user) {
+                try {
+                    const colRef = collection(db, 'artifacts', appId, 'users', user.uid, 'myexpiry_items');
+                    await addDoc(colRef, rekodBaru);
+                } catch (error) {
+                    console.error("Gagal simpan ke awan, menggunakan lokal:", error);
+                    simpanKeLocal(rekodBaru);
+                }
+            } else {
+                simpanKeLocal(rekodBaru);
+            }
+            
+            window.tutupModalTambah();
+            document.getElementById('borang').reset();
+        }
+
+        // Operasi Buang Data
+        window.buang = async function(targetId) {
+            if (db && user && targetId.length > 15) { 
+                // ID Firebase biasanya panjang, kita cuba padam di awan
+                try {
+                    const docRef = doc(db, 'artifacts', appId, 'users', user.uid, 'myexpiry_items', targetId);
+                    await deleteDoc(docRef);
+                } catch (error) {
+                    console.error("Gagal padam dari awan, memadam lokal:", error);
+                    padamDariLocal(targetId);
+                }
+            } else {
+                padamDariLocal(targetId);
+            }
+            window.tutupModalInfo(); 
+        }
+
+        function simpanKeLocal(rekod) {
+            window.pangkalanData.push(rekod);
+            localStorage.setItem('myexpiry_data', JSON.stringify(window.pangkalanData));
+            kemaskiniData();
+        }
+
+        function padamDariLocal(targetId) {
+            window.pangkalanData = window.pangkalanData.filter(i => (i.dbId || i.id) !== targetId);
+            localStorage.setItem('myexpiry_data', JSON.stringify(window.pangkalanData));
+            kemaskiniData();
+        }
+
+        // Kawalan Modal (Tetingkap Timbul)
+        window.bukaModalTambah = function() { document.getElementById('modal-tambah').classList.replace('hidden', 'flex'); }
+        window.tutupModalTambah = function() { document.getElementById('modal-tambah').classList.replace('flex', 'hidden'); }
+        
+        window.bukaModalInfo = function(targetId) {
+            const item = window.pangkalanData.find(i => (i.dbId || i.id) === targetId);
+            if(!item) return;
+
+            const bakiHari = kiraHari(item.tarikh);
+            const gaya = dapatkanGaya(bakiHari, item.jenis);
+
+            document.getElementById('info-header').className = `h-32 relative flex items-center justify-center transition-colors ${gaya.headerWarna}`;
+            document.getElementById('info-ikon-besar').innerHTML = `<img src="${gaya.ikonUrl}" alt="${item.jenis}" class="ikon-imej-besar">`;
+            document.getElementById('info-nama').innerText = item.nama;
+            document.getElementById('info-jenis').innerHTML = `<span class="bg-slate-100 px-2 py-0.5 rounded text-sm">${item.jenis}</span>`;
+            
+            const opsyenTarikh = { day: 'numeric', month: 'short', year: 'numeric' };
+            document.getElementById('info-tarikh-daftar').innerText = new Date(item.daftar).toLocaleDateString('ms-MY', opsyenTarikh);
+            document.getElementById('info-tarikh-sasaran').innerText = new Date(item.tarikh).toLocaleDateString('ms-MY', opsyenTarikh);
+            
+            const elmBaki = document.getElementById('info-baki-masa');
+            elmBaki.innerText = formatMasa(bakiHari);
+            elmBaki.className = `text-2xl font-black ${gaya.teksWarna}`;
+            document.getElementById('info-status-badge').outerHTML = gaya.statusBadge.replace('<span', '<div id="info-status-badge" class="absolute top-4 right-6 shadow-sm"').replace('</span>', '</div>');
+            
+            document.getElementById('info-nota').innerText = item.nota || 'Tiada nota tambahan dimasukkan untuk item ini.';
+            document.getElementById('btn-padam-info').onclick = function() { window.buang(targetId); };
+            document.getElementById('modal-info').classList.replace('hidden', 'flex');
+        }
+
+        window.tutupModalInfo = function() { document.getElementById('modal-info').classList.replace('flex', 'hidden'); }
+
+
+        // =========================================================================
+        // 3. KONFIGURASI PANGKALAN DATA AWAN (FIREBASE & GOOGLE LOGIN)
+        // =========================================================================
+        const myFirebaseConfig = {
+            apiKey: "AIzaSyDoqzlqifrHbbBYviaYGhQh-QUoFqRw6Iw",
+            authDomain: "docuvault-v2.firebaseapp.com",
+            projectId: "docuvault-v2",
+            storageBucket: "docuvault-v2.firebasestorage.app",
+            messagingSenderId: "734492192690",
+            appId: "1:734492192690:web:4c9529d6818319f76b3eab"
+        };
+        
         let app, auth, db, user;
-        let unsubscribeSnapshot = null; // Menyimpan rujukan onSnapshot
+        let unsubscribeSnapshot = null; 
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'myexpiry-peribadi';
         
-        const firebaseConfig = typeof __firebase_config !== 'undefined' 
-            ? JSON.parse(__firebase_config) 
-            : (myFirebaseConfig.apiKey !== "SILA_LETAK_API_KEY_ANDA" ? myFirebaseConfig : null);
+        // Memeriksa jika API Key belum ditukar oleh pengguna
+        const isFirebaseValid = myFirebaseConfig.apiKey && myFirebaseConfig.apiKey !== "SILA_LETAK_API_KEY_ANDA";
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : (isFirebaseValid ? myFirebaseConfig : null);
 
         // Kawalan UI Profil & Login
         const updateAuthUI = (u) => {
@@ -431,21 +542,15 @@
             const userInitial = document.getElementById('user-initial');
 
             if (u && !u.isAnonymous) {
-                // Berjaya Log Masuk Google
                 btnLogin.classList.add('hidden');
                 profileArea.classList.replace('hidden', 'flex');
                 userName.innerText = u.displayName || "Pengguna";
-                
                 if (u.photoURL) {
-                    userPic.src = u.photoURL;
-                    userPic.classList.remove('hidden');
-                    userInitial.classList.add('hidden');
+                    userPic.src = u.photoURL; userPic.classList.remove('hidden'); userInitial.classList.add('hidden');
                 } else {
-                    userPic.classList.add('hidden');
-                    userInitial.classList.remove('hidden');
+                    userPic.classList.add('hidden'); userInitial.classList.remove('hidden');
                 }
             } else {
-                // Anonymous Log In (Tetamu) ATAU Tiada Akaun
                 btnLogin.classList.remove('hidden');
                 profileArea.classList.replace('hidden', 'flex');
                 userName.innerText = "Tetamu (Lokal)";
@@ -454,10 +559,9 @@
             }
         };
 
-        // Takrifkan fungsi log masuk secara Global agar sentiasa boleh dipanggil butang HTML
         window.loginGoogle = async () => {
             if (!auth) {
-                alert("Sila masukkan API Key Firebase anda di bahagian kod (myFirebaseConfig) untuk membolehkan fungsi Log Masuk.");
+                document.getElementById('modal-amaran').classList.replace('hidden', 'flex');
                 return;
             }
             try {
@@ -465,7 +569,6 @@
                 await signInWithPopup(auth, provider);
             } catch (error) {
                 console.error("Ralat Google Auth:", error);
-                // Tunjuk alert custom jika error (biasanya error iframe block di preview web)
                 document.getElementById('modal-amaran').classList.replace('hidden', 'flex');
             }
         };
@@ -474,54 +577,56 @@
             if (!auth) return;
             try {
                 await signOut(auth);
-                // Selepas logout, login kembali sbg tetamu supaya app masih boleh dipakai lokal
-                await signInAnonymously(auth);
-            } catch (error) {
-                console.error("Ralat Log Keluar:", error);
-            }
+                await signInAnonymously(auth); // Kembali ke mod tetamu
+            } catch (error) { console.error("Ralat Log Keluar:", error); }
         };
 
+        // Inisialisasi Firebase (Dibalut dengan Try-Catch agar tidak mematikan sistem jika ralat)
         if (firebaseConfig) {
-            app = initializeApp(firebaseConfig);
-            auth = getAuth(app);
-            db = getFirestore(app);
+            try {
+                app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
 
-            const initAuth = async () => {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
-            };
-            initAuth();
+                const initAuth = async () => {
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+                };
+                initAuth();
 
-            onAuthStateChanged(auth, (u) => {
-                user = u;
-                updateAuthUI(u);
-                
-                if (u) {
-                    muatTurunDataRealtime();
-                } else {
-                    // Jika ter-log out, bersihkan data paparan
-                    if(unsubscribeSnapshot) unsubscribeSnapshot();
-                    window.pangkalanData = [];
-                    kemaskiniData();
-                }
-            });
-
+                onAuthStateChanged(auth, (u) => {
+                    user = u;
+                    updateAuthUI(u);
+                    if (u) {
+                        muatTurunDataRealtime();
+                    } else {
+                        if(unsubscribeSnapshot) unsubscribeSnapshot();
+                        // Muat semula data dari memori jika log keluar
+                        window.pangkalanData = JSON.parse(localStorage.getItem('myexpiry_data')) || []; 
+                        kemaskiniData();
+                    }
+                });
+            } catch (err) {
+                console.error("Ralat memuatkan Firebase:", err);
+                // Matikan fungsi awan, guna memori peranti
+                auth = null; db = null; user = null;
+                updateAuthUI(null);
+                kemaskiniData();
+            }
         } else {
-            console.warn("Firebase belum dikonfigurasi.");
+            console.warn("Sistem berjalan menggunakan Memori Peranti (Local Storage).");
             updateAuthUI(null);
             kemaskiniData();
         }
 
         function muatTurunDataRealtime() {
-            if (!user) return;
-            // Padam listener lama jika ada (elak duplicate data bila tukar akaun)
+            if (!user || !db) return;
             if (unsubscribeSnapshot) unsubscribeSnapshot();
 
             const colRef = collection(db, 'artifacts', appId, 'users', user.uid, 'myexpiry_items');
-            
             unsubscribeSnapshot = onSnapshot(colRef, (snapshot) => {
                 window.pangkalanData = [];
                 snapshot.forEach(doc => {
@@ -529,22 +634,23 @@
                 });
                 kemaskiniData();
             }, (error) => {
-                console.error("Ralat memuat turun data:", error);
+                console.error("Ralat memuat turun data awan:", error);
             });
         }
 
-        // Fungsi Mengira Hari
+        // =========================================================================
+        // 4. FUNGSI UTILITI & RENDER JADUAL
+        // =========================================================================
+        
         function kiraHari(tarikh) {
             const sasaran = new Date(tarikh); sasaran.setHours(0,0,0,0);
             const mula = new Date(); mula.setHours(0,0,0,0);
             return Math.ceil((sasaran.getTime() - mula.getTime()) / (1000 * 60 * 60 * 24));
         }
 
-        // Format Teks Masa
         function formatMasa(hari) {
             if (hari < 0) return `Tamat ${Math.abs(hari)} hari lepas`;
             if (hari === 0) return `Tamat Hari Ini`;
-            
             if (hari > 30) {
                 let bulan = Math.floor(hari / 30);
                 let baki = hari % 30;
@@ -553,44 +659,34 @@
             return `${hari} hari lagi`;
         }
 
-        // Dapatkan Gaya (Warna & Ikon) berdasarkan hari dan jenis
         function dapatkanGaya(hari, jenis) {
             let gaya = { bgWarna: '', teksWarna: '', ikonUrl: '', statusBadge: '' };
-            
-            if (jenis === 'Makanan') {
-                gaya.ikonUrl = hari < 0 ? ikonMakananTamat : ikonMakanan;
-            } else {
-                gaya.ikonUrl = hari < 0 ? ikonWarantiTamat : ikonWaranti;
-            }
+            if (jenis === 'Makanan') { gaya.ikonUrl = hari < 0 ? ikonMakananTamat : ikonMakanan; } 
+            else { gaya.ikonUrl = hari < 0 ? ikonWarantiTamat : ikonWaranti; }
 
             if (hari < 0) {
-                gaya.teksWarna = 'text-rose-600';
-                gaya.bgWarna = 'bg-rose-50 border-rose-100';
+                gaya.teksWarna = 'text-rose-600'; gaya.bgWarna = 'bg-rose-50 border-rose-100';
                 gaya.statusBadge = '<span class="bg-rose-100 text-rose-700 px-3 py-1 rounded-full text-xs font-bold border border-rose-200">Telah Tamat</span>';
                 gaya.headerWarna = 'bg-gradient-to-r from-rose-400 to-red-500';
             } else if (hari <= 7) {
-                gaya.teksWarna = 'text-amber-600';
-                gaya.bgWarna = 'bg-amber-50 border-amber-100';
+                gaya.teksWarna = 'text-amber-600'; gaya.bgWarna = 'bg-amber-50 border-amber-100';
                 gaya.statusBadge = '<span class="bg-amber-100 text-amber-700 px-3 py-1 rounded-full text-xs font-bold border border-amber-200">Kritikal</span>';
                 gaya.headerWarna = 'bg-gradient-to-r from-amber-400 to-orange-500';
             } else {
-                gaya.teksWarna = 'text-slate-600';
-                gaya.bgWarna = 'bg-emerald-50 border-emerald-100';
+                gaya.teksWarna = 'text-slate-600'; gaya.bgWarna = 'bg-emerald-50 border-emerald-100';
                 gaya.statusBadge = '<span class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-xs font-bold border border-emerald-200">Aktif</span>';
                 gaya.headerWarna = 'bg-gradient-to-r from-teal-400 to-emerald-500';
             }
             return gaya;
         }
 
-        // Render Antaramuka Utama (Dashboard & Jadual)
         function kemaskiniData() {
             let mTamat = 0, wTamat = 0, amaran = 0, aktif = 0;
             
             window.pangkalanData.forEach(item => {
                 let h = kiraHari(item.tarikh);
-                if (h < 0) {
-                    item.jenis === 'Makanan' ? mTamat++ : wTamat++;
-                } else if (h <= 7) { amaran++; } 
+                if (h < 0) { item.jenis === 'Makanan' ? mTamat++ : wTamat++; } 
+                else if (h <= 7) { amaran++; } 
                 else { aktif++; }
             });
 
@@ -604,8 +700,6 @@
             tbody.innerHTML = '';
             
             let dataView = window.tabSemasa === 'Semua' ? window.pangkalanData : window.pangkalanData.filter(i => i.jenis === window.tabSemasa);
-            
-            // Susun: Paling kritikal (hari < 0) di atas, diikuti yang paling hampir tamat
             dataView.sort((a,b) => kiraHari(a.tarikh) - kiraHari(b.tarikh));
 
             if(dataView.length === 0) {
@@ -616,8 +710,6 @@
                     let bakiHari = kiraHari(item.tarikh);
                     let gaya = dapatkanGaya(bakiHari, item.jenis);
                     let teksMasa = formatMasa(bakiHari);
-                    
-                    // Gunakan ID pangkalan data awan jika ada, jika tiada guna ID lokal
                     let targetId = item.dbId || item.id;
                     
                     tbody.innerHTML += `
@@ -653,118 +745,8 @@
             }
         }
 
-        // Pengendalian Tab
-        window.tukarTab = function(jenis) {
-            window.tabSemasa = jenis;
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('bg-white', 'text-slate-800', 'shadow-sm');
-                btn.classList.add('text-slate-500');
-            });
-            let aktifBtn = document.getElementById('tab-' + jenis);
-            aktifBtn.classList.remove('text-slate-500');
-            aktifBtn.classList.add('bg-white', 'text-slate-800', 'shadow-sm');
-            kemaskiniData();
-        }
-
-        // Operasi CRUD
-        window.simpanData = async function(e) {
-            e.preventDefault();
-            const jenisTerpilih = document.querySelector('input[name="in-jenis"]:checked').value;
-            const hariIniTxt = new Date().toISOString().split('T')[0];
-
-            const rekodBaru = {
-                id: Date.now().toString(), // Backup lokal
-                nama: document.getElementById('in-nama').value,
-                jenis: jenisTerpilih,
-                tarikh: document.getElementById('in-tarikh').value,
-                nota: document.getElementById('in-nota').value,
-                daftar: hariIniTxt
-            };
-
-            // Simpan ke Firestore (Cloud) jika disambungkan
-            if (db && user) {
-                try {
-                    const colRef = collection(db, 'artifacts', appId, 'users', user.uid, 'myexpiry_items');
-                    await addDoc(colRef, rekodBaru);
-                } catch (error) {
-                    console.error("Gagal simpan ke awan:", error);
-                }
-            } else {
-                // Simpan lokal jika tidak online
-                window.pangkalanData.push(rekodBaru);
-                kemaskiniData();
-            }
-            
-            window.tutupModalTambah();
-            document.getElementById('borang').reset();
-        }
-
-        window.buang = async function(targetId) {
-            if (db && user) {
-                try {
-                    const docRef = doc(db, 'artifacts', appId, 'users', user.uid, 'myexpiry_items', targetId);
-                    await deleteDoc(docRef);
-                } catch (error) {
-                    console.error("Gagal padam dari awan:", error);
-                }
-            } else {
-                window.pangkalanData = window.pangkalanData.filter(i => (i.dbId || i.id) !== targetId);
-                kemaskiniData();
-            }
-            window.tutupModalInfo(); 
-        }
-
-        // Kawalan Modal Tambah
-        window.bukaModalTambah = function() { 
-            document.getElementById('modal-tambah').classList.replace('hidden', 'flex'); 
-        }
-        window.tutupModalTambah = function() { 
-            document.getElementById('modal-tambah').classList.replace('flex', 'hidden'); 
-        }
-
-        // Kawalan Modal Pop-up Maklumat 
-        window.bukaModalInfo = function(targetId) {
-            const item = window.pangkalanData.find(i => (i.dbId || i.id) === targetId);
-            if(!item) return;
-
-            const bakiHari = kiraHari(item.tarikh);
-            const gaya = dapatkanGaya(bakiHari, item.jenis);
-
-            // Set Header Warna
-            const header = document.getElementById('info-header');
-            header.className = `h-32 relative flex items-center justify-center transition-colors ${gaya.headerWarna}`;
-
-            // Set Ikon
-            document.getElementById('info-ikon-besar').innerHTML = `<img src="${gaya.ikonUrl}" alt="${item.jenis}" class="ikon-imej-besar">`;
-
-            // Set Maklumat Teks
-            document.getElementById('info-nama').innerText = item.nama;
-            document.getElementById('info-jenis').innerHTML = `<span class="bg-slate-100 px-2 py-0.5 rounded text-sm">${item.jenis}</span>`;
-            
-            // Format Tarikh 
-            const opsyenTarikh = { day: 'numeric', month: 'short', year: 'numeric' };
-            document.getElementById('info-tarikh-daftar').innerText = new Date(item.daftar).toLocaleDateString('ms-MY', opsyenTarikh);
-            document.getElementById('info-tarikh-sasaran').innerText = new Date(item.tarikh).toLocaleDateString('ms-MY', opsyenTarikh);
-            
-            // Set Baki Masa & Status
-            const elmBaki = document.getElementById('info-baki-masa');
-            elmBaki.innerText = formatMasa(bakiHari);
-            elmBaki.className = `text-2xl font-black ${gaya.teksWarna}`;
-            document.getElementById('info-status-badge').outerHTML = gaya.statusBadge.replace('<span', '<div id="info-status-badge" class="absolute top-4 right-6 shadow-sm"').replace('</span>', '</div>');
-            
-            // Set Nota
-            document.getElementById('info-nota').innerText = item.nota || 'Tiada nota tambahan dimasukkan untuk item ini.';
-
-            // Setup butang padam dalam modal
-            document.getElementById('btn-padam-info').onclick = function() { window.buang(targetId); };
-
-            // Tunjuk Modal
-            document.getElementById('modal-info').classList.replace('hidden', 'flex');
-        }
-
-        window.tutupModalInfo = function() {
-            document.getElementById('modal-info').classList.replace('flex', 'hidden');
-        }
+        // Panggil render jadual kali pertama
+        kemaskiniData();
 
     </script>
 </body>
