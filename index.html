@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OmniTrack - Sistem Pengurusan Tamat Tempoh & Waranti</title>
+    <title>MyExpiry+ - Sistem Pengurusan Tamat Tempoh & Waranti</title>
+    <!-- Favicon Sistem -->
+    <link rel="icon" href="https://lh3.googleusercontent.com/d/1FjDbZbvpm6mNqef6ApAP8QJaS3CskOqw" type="image/png">
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts -->
@@ -84,10 +86,8 @@
     <nav class="bg-white shadow-sm border-b border-slate-200 sticky top-0 z-20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <div class="bg-teal-50 text-teal-600 p-2 rounded-xl shadow-inner">
-                    <i class="fas fa-boxes-packing text-xl"></i>
-                </div>
-                <span class="font-extrabold text-2xl tracking-tight text-slate-800">Omni<span class="text-teal-600">Track</span></span>
+                <img src="https://lh3.googleusercontent.com/d/1FjDbZbvpm6mNqef6ApAP8QJaS3CskOqw" alt="Logo MyExpiry+" class="w-10 h-10 object-contain drop-shadow-sm">
+                <span class="font-extrabold text-2xl tracking-tight text-slate-800">MyExpiry<span class="text-teal-600">+</span></span>
             </div>
             <div class="flex items-center gap-4">
                 <div class="hidden sm:flex items-center bg-slate-100 rounded-full px-3 py-1.5">
@@ -191,9 +191,9 @@
                         <!-- Data dimasukkan via JS -->
                     </tbody>
                 </table>
-                <div id="tiada-data" class="hidden text-center py-12">
-                    <div class="text-slate-300 mb-4">
-                        <img src="https://img.icons8.com/3d-fluency/100/box.png" alt="Kosong" class="w-32 h-32 object-contain mx-auto opacity-50 grayscale">
+                <div id="tiada-data" class="hidden text-center py-12 px-4">
+                    <div class="mb-4">
+                        <img src="https://lh3.googleusercontent.com/d/10vNQNk1lLERN_m2yRyTqfi_IK2xRfvP4" alt="Tiada Rekod" class="w-32 h-32 md:w-40 md:h-40 object-contain mx-auto drop-shadow-md hover:scale-105 transition-transform">
                     </div>
                     <p class="text-slate-500 font-medium text-lg">Tiada rekod ditemui untuk kategori ini.</p>
                 </div>
@@ -225,14 +225,14 @@
                             <label class="cursor-pointer">
                                 <input type="radio" name="in-jenis" value="Makanan" class="peer sr-only" checked>
                                 <div class="rounded-xl border-2 border-slate-200 p-3 text-center peer-checked:border-teal-500 peer-checked:bg-teal-50 transition-all flex flex-col items-center justify-center">
-                                    <img src="https://img.icons8.com/3d-fluency/100/hamburger.png" alt="Makanan" class="ikon-form">
+                                    <img src="https://lh3.googleusercontent.com/d/1IKpcPxySHIRYsdhZ6i46vTob_0hIVmT_" alt="Makanan" class="ikon-form">
                                     <div class="font-bold text-sm text-slate-700">Makanan</div>
                                 </div>
                             </label>
                             <label class="cursor-pointer">
                                 <input type="radio" name="in-jenis" value="Waranti" class="peer sr-only">
                                 <div class="rounded-xl border-2 border-slate-200 p-3 text-center peer-checked:border-teal-500 peer-checked:bg-teal-50 transition-all flex flex-col items-center justify-center">
-                                    <img src="https://img.icons8.com/3d-fluency/100/laptop.png" alt="Waranti" class="ikon-form">
+                                    <img src="https://lh3.googleusercontent.com/d/1hu1Z7oLRGxvUE37p1oX5Mhwhw53FGm5f" alt="Waranti" class="ikon-form">
                                     <div class="font-bold text-sm text-slate-700">Waranti</div>
                                 </div>
                             </label>
@@ -316,9 +316,9 @@
         // Data Mockup (Termasuk tarikh pendaftaran & nota)
         const t = (h) => { let d = new Date(); d.setDate(d.getDate() + h); return d.toISOString().split('T')[0]; };
         
-        // URL Ikon 3D Baharu (Menggunakan API stabil dari Icons8)
-        const ikonMakanan = "https://img.icons8.com/3d-fluency/100/hamburger.png";
-        const ikonWaranti = "https://img.icons8.com/3d-fluency/100/laptop.png";
+        // URL Ikon 3D Baharu
+        const ikonMakanan = "https://lh3.googleusercontent.com/d/1IKpcPxySHIRYsdhZ6i46vTob_0hIVmT_";
+        const ikonWaranti = "https://lh3.googleusercontent.com/d/1hu1Z7oLRGxvUE37p1oX5Mhwhw53FGm5f";
         const ikonMakananTamat = "https://img.icons8.com/3d-fluency/100/delete-trash.png"; // Ikon tong sampah untuk makanan rosak
         const ikonWarantiTamat = "https://img.icons8.com/3d-fluency/100/cancel.png";    // Ikon pangkah untuk waranti tamat
 
