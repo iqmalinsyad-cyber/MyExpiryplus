@@ -80,6 +80,7 @@
         .card-purple { background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%); color: white; box-shadow: 0 10px 15px -3px rgba(161, 140, 209, 0.3); }
         .card-orange { background: linear-gradient(135deg, #f6d365 0%, #fda085 100%); color: white; box-shadow: 0 10px 15px -3px rgba(246, 211, 101, 0.3); }
         .card-green { background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%); color: #0f172a; box-shadow: 0 10px 15px -3px rgba(132, 250, 176, 0.3); }
+        .card-ruby { background: linear-gradient(135deg, #ff0844 0%, #ffb199 100%); color: white; box-shadow: 0 10px 15px -3px rgba(255, 8, 68, 0.3); }
 
         /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 8px; }
@@ -133,30 +134,9 @@
                     <input type="text" placeholder="Cari item..." class="bg-transparent border-none focus:outline-none text-sm ml-2 text-slate-700 w-32">
                 </div>
                 
-                <!-- Bahagian Log Masuk / Profil Pengguna -->
-                <div id="auth-container" class="flex items-center">
-                    <!-- Butang Log Masuk Google (Disembunyikan pada asalnya) -->
-                    <button id="btn-login" onclick="window.loginGoogle()" class="hidden bg-white text-teal-600 border border-teal-200 hover:bg-teal-50 px-4 py-1.5 rounded-full text-sm font-bold shadow-sm transition-colors flex items-center gap-2">
-                        <img src="https://img.icons8.com/color/48/google-logo.png" alt="Google" class="w-4 h-4"> Log Masuk
-                    </button>
-
-                    <!-- Profil Pengguna Aktif -->
-                    <div id="user-profile" class="hidden items-center gap-3">
-                        <span id="user-name" class="text-sm font-bold text-slate-700 hidden sm:block">Memuatkan...</span>
-                        
-                        <!-- Gambar Google Profile Jika Ada -->
-                        <img id="user-pic" src="" alt="Profile" class="h-9 w-9 rounded-full border-2 border-teal-200 shadow-sm object-cover hidden">
-                        
-                        <!-- Ikon Tetamu / Inisial Default -->
-                        <div id="user-initial" class="h-9 w-9 rounded-full bg-teal-100 text-teal-700 flex items-center justify-center font-bold border border-teal-200 shadow-sm">
-                            <i class="fas fa-user"></i>
-                        </div>
-                        
-                        <!-- Butang Log Keluar -->
-                        <button onclick="window.logoutGoogle()" class="text-slate-400 hover:text-red-500 transition-colors ml-1 p-2 rounded-full hover:bg-red-50" title="Log Keluar">
-                            <i class="fas fa-sign-out-alt"></i>
-                        </button>
-                    </div>
+                <div class="text-xs font-bold text-teal-600 bg-teal-50 px-3 py-1.5 rounded-full border border-teal-200 shadow-sm flex items-center gap-1">
+                    <div class="w-2 h-2 rounded-full bg-teal-500 animate-pulse"></div>
+                    Live Sync
                 </div>
             </div>
         </div>
@@ -176,7 +156,7 @@
         </header>
 
         <!-- Grid Statistik (Kad Berwarna) -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 lg:gap-6 mb-8">
             <!-- Kad Makanan Tamat -->
             <div class="card-red rounded-2xl p-6 relative overflow-hidden fade-in">
                 <div class="absolute -right-4 -bottom-4 opacity-30">
@@ -184,20 +164,20 @@
                 </div>
                 <div class="relative z-10">
                     <p class="font-semibold text-white/90 uppercase tracking-wider text-xs mb-1">Makanan Tamat Tempoh</p>
-                    <h2 class="text-5xl font-black mb-1" id="stat-makanan-tamat">0</h2>
+                    <h2 class="text-4xl lg:text-5xl font-black mb-1" id="stat-makanan-tamat">0</h2>
                     <p class="text-sm bg-white/20 inline-block px-3 py-1 rounded-full backdrop-blur-sm mt-2"><i class="fas fa-trash-can mr-1"></i> Sila lupuskan</p>
                 </div>
             </div>
 
-            <!-- Kad Waranti Tamat -->
-            <div class="card-purple rounded-2xl p-6 relative overflow-hidden fade-in" style="animation-delay: 0.1s;">
+            <!-- Kad Kritikal Makanan (Kad Baru) -->
+            <div class="card-ruby rounded-2xl p-6 relative overflow-hidden fade-in" style="animation-delay: 0.1s;">
                 <div class="absolute -right-4 -bottom-4 opacity-30">
-                    <img src="https://img.icons8.com/3d-fluency/100/cancel.png" alt="Tiada Waranti" class="w-32 h-32 object-contain opacity-50 grayscale">
+                    <img src="https://img.icons8.com/3d-fluency/100/box-important.png" alt="Kritikal" class="w-32 h-32 object-contain opacity-50 grayscale">
                 </div>
                 <div class="relative z-10">
-                    <p class="font-semibold text-white/90 uppercase tracking-wider text-xs mb-1">Waranti Produk Tamat</p>
-                    <h2 class="text-5xl font-black mb-1" id="stat-waranti-tamat">0</h2>
-                    <p class="text-sm bg-white/20 inline-block px-3 py-1 rounded-full backdrop-blur-sm mt-2"><i class="fas fa-ban mr-1"></i> Tiada perlindungan</p>
+                    <p class="font-semibold text-white/90 uppercase tracking-wider text-xs mb-1">Kritikal Makanan (≤ 1 Hari)</p>
+                    <h2 class="text-4xl lg:text-5xl font-black mb-1" id="stat-makanan-kritikal">0</h2>
+                    <p class="text-xs bg-white/20 inline-block px-3 py-1 rounded-full backdrop-blur-sm mt-2"><i class="fas fa-exclamation-triangle mr-1"></i> Perhatian Segera</p>
                 </div>
             </div>
 
@@ -206,17 +186,29 @@
                 <div class="absolute -right-4 -bottom-4 opacity-20"><i class="fas fa-hourglass-half text-8xl"></i></div>
                 <div class="relative z-10">
                     <p class="font-semibold text-white/90 uppercase tracking-wider text-xs mb-1">Amaran (Hampir Tamat)</p>
-                    <h2 class="text-5xl font-black mb-1" id="stat-amaran">0</h2>
+                    <h2 class="text-4xl lg:text-5xl font-black mb-1" id="stat-amaran">0</h2>
                     <p class="text-sm bg-white/20 inline-block px-3 py-1 rounded-full backdrop-blur-sm mt-2"><i class="fas fa-bell mr-1"></i> ≤ 7 Hari lagi</p>
                 </div>
             </div>
 
+            <!-- Kad Waranti Tamat -->
+            <div class="card-purple rounded-2xl p-6 relative overflow-hidden fade-in" style="animation-delay: 0.3s;">
+                <div class="absolute -right-4 -bottom-4 opacity-30">
+                    <img src="https://img.icons8.com/3d-fluency/100/cancel.png" alt="Tiada Waranti" class="w-32 h-32 object-contain opacity-50 grayscale">
+                </div>
+                <div class="relative z-10">
+                    <p class="font-semibold text-white/90 uppercase tracking-wider text-xs mb-1">Waranti Produk Tamat</p>
+                    <h2 class="text-4xl lg:text-5xl font-black mb-1" id="stat-waranti-tamat">0</h2>
+                    <p class="text-sm bg-white/20 inline-block px-3 py-1 rounded-full backdrop-blur-sm mt-2"><i class="fas fa-ban mr-1"></i> Tiada perlindungan</p>
+                </div>
+            </div>
+
             <!-- Kad Aktif -->
-            <div class="card-green rounded-2xl p-6 relative overflow-hidden fade-in" style="animation-delay: 0.3s;">
+            <div class="card-green rounded-2xl p-6 relative overflow-hidden fade-in" style="animation-delay: 0.4s;">
                 <div class="absolute -right-4 -bottom-4 opacity-10"><i class="fas fa-check-double text-8xl"></i></div>
                 <div class="relative z-10">
                     <p class="font-semibold text-slate-700/80 uppercase tracking-wider text-xs mb-1">Total Item Aktif</p>
-                    <h2 class="text-5xl font-black mb-1 text-slate-800" id="stat-aktif">0</h2>
+                    <h2 class="text-4xl lg:text-5xl font-black mb-1 text-slate-800" id="stat-aktif">0</h2>
                     <p class="text-sm bg-white/30 text-slate-800 inline-block px-3 py-1 rounded-full backdrop-blur-sm mt-2"><i class="fas fa-shield-halved mr-1"></i> Selamat digunakan</p>
                 </div>
             </div>
@@ -372,22 +364,10 @@
         </div>
     </div>
 
-    <!-- Modal Amaran Iframe Custom (Bila Log Masuk Google Disekat di Canvas) -->
-    <div id="modal-amaran" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-[60] transition-opacity">
-        <div class="bg-white rounded-2xl w-full max-w-sm mx-4 p-6 shadow-2xl text-center">
-            <div class="h-16 w-16 bg-amber-100 text-amber-500 rounded-full flex items-center justify-center text-3xl mx-auto mb-4">
-                <i class="fas fa-exclamation-triangle"></i>
-            </div>
-            <h3 class="font-bold text-xl text-slate-800 mb-2">Peringatan Awan</h3>
-            <p class="text-slate-600 text-sm mb-6">Log masuk awan disekat/tidak dikonfigurasi dengan betul. <br><br><b>Sila masukkan kod API Key Firebase yang sah</b> di dalam fail untuk menghidupkan fungsi ini.</p>
-            <button onclick="document.getElementById('modal-amaran').classList.replace('flex', 'hidden')" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 rounded-xl transition-colors">Faham</button>
-        </div>
-    </div>
-
-    <!-- ================= SCRIPT LOGIK SISTEM (REAL-TIME FIREBASE + GOOGLE AUTH) ================= -->
+    <!-- ================= SCRIPT LOGIK SISTEM (REAL-TIME PANGKALAN DATA AWAM) ================= -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // URL Ikon 3D
@@ -397,16 +377,24 @@
         const ikonWarantiTamat = "https://img.icons8.com/3d-fluency/100/cancel.png";    
 
         // =========================================================================
-        // 1. SETUP MEMORI LOKAL SEBAGAI SANDARAN (FALLBACK)
+        // 1. SETUP AWALAN
         // =========================================================================
-        window.pangkalanData = JSON.parse(localStorage.getItem('myexpiry_data')) || []; 
+        window.pangkalanData = []; 
         window.tabSemasa = 'Semua';
+        
+        try {
+            const dataTersimpan = localStorage.getItem('myexpiry_data');
+            if (dataTersimpan) {
+                window.pangkalanData = JSON.parse(dataTersimpan);
+            }
+        } catch (e) {
+            console.warn("Akses LocalStorage disekat di dalam persekitaran ini.");
+        }
 
         // =========================================================================
         // 2. PENDAFTARAN FUNGSI UI / BUTANG DI AWAL KOD AGAR SENTIASA BERFUNGSI
         // =========================================================================
         
-        // Pengendalian Tab
         window.tukarTab = function(jenis) {
             window.tabSemasa = jenis;
             document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -419,14 +407,13 @@
             kemaskiniData();
         }
 
-        // Operasi Simpan Data Baru
         window.simpanData = async function(e) {
             e.preventDefault();
             const jenisTerpilih = document.querySelector('input[name="in-jenis"]:checked').value;
             const hariIniTxt = new Date().toISOString().split('T')[0];
 
             const rekodBaru = {
-                id: Date.now().toString(), // ID Lokal Backup
+                id: Date.now().toString(),
                 nama: document.getElementById('in-nama').value,
                 jenis: jenisTerpilih,
                 tarikh: document.getElementById('in-tarikh').value,
@@ -434,10 +421,10 @@
                 daftar: hariIniTxt
             };
 
-            // Simpan ke Firestore (Cloud) jika disambungkan, jika gagal/tiada cloud -> simpan lokal
+            // Jika awan bersambung, simpan ke awan (Public Data). Jika tidak, simpan lokal.
             if (db && user) {
                 try {
-                    const colRef = collection(db, 'artifacts', appId, 'users', user.uid, 'myexpiry_items');
+                    const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'myexpiry_items');
                     await addDoc(colRef, rekodBaru);
                 } catch (error) {
                     console.error("Gagal simpan ke awan, menggunakan lokal:", error);
@@ -451,12 +438,10 @@
             document.getElementById('borang').reset();
         }
 
-        // Operasi Buang Data
         window.buang = async function(targetId) {
             if (db && user && targetId.length > 15) { 
-                // ID Firebase biasanya panjang, kita cuba padam di awan
                 try {
-                    const docRef = doc(db, 'artifacts', appId, 'users', user.uid, 'myexpiry_items', targetId);
+                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'myexpiry_items', targetId);
                     await deleteDoc(docRef);
                 } catch (error) {
                     console.error("Gagal padam dari awan, memadam lokal:", error);
@@ -470,17 +455,20 @@
 
         function simpanKeLocal(rekod) {
             window.pangkalanData.push(rekod);
-            localStorage.setItem('myexpiry_data', JSON.stringify(window.pangkalanData));
+            try {
+                localStorage.setItem('myexpiry_data', JSON.stringify(window.pangkalanData));
+            } catch(e) {}
             kemaskiniData();
         }
 
         function padamDariLocal(targetId) {
             window.pangkalanData = window.pangkalanData.filter(i => (i.dbId || i.id) !== targetId);
-            localStorage.setItem('myexpiry_data', JSON.stringify(window.pangkalanData));
+            try {
+                localStorage.setItem('myexpiry_data', JSON.stringify(window.pangkalanData));
+            } catch(e) {}
             kemaskiniData();
         }
 
-        // Kawalan Modal (Tetingkap Timbul)
         window.bukaModalTambah = function() { document.getElementById('modal-tambah').classList.replace('hidden', 'flex'); }
         window.tutupModalTambah = function() { document.getElementById('modal-tambah').classList.replace('flex', 'hidden'); }
         
@@ -512,76 +500,25 @@
 
         window.tutupModalInfo = function() { document.getElementById('modal-info').classList.replace('flex', 'hidden'); }
 
-
         // =========================================================================
-        // 3. KONFIGURASI PANGKALAN DATA AWAN (FIREBASE & GOOGLE LOGIN)
+        // 3. KONFIGURASI PANGKALAN DATA AWAM FIREBASE
         // =========================================================================
         const myFirebaseConfig = {
-            apiKey: "AIzaSyDoqzlqifrHbbBYviaYGhQh-QUoFqRw6Iw",
-            authDomain: "docuvault-v2.firebaseapp.com",
-            projectId: "docuvault-v2",
-            storageBucket: "docuvault-v2.firebasestorage.app",
-            messagingSenderId: "734492192690",
-            appId: "1:734492192690:web:4c9529d6818319f76b3eab"
+            apiKey: "SILA_LETAK_API_KEY_ANDA",
+            authDomain: "SILA_LETAK_AUTH_DOMAIN_ANDA",
+            projectId: "SILA_LETAK_PROJECT_ID_ANDA",
+            storageBucket: "SILA_LETAK_STORAGE_BUCKET_ANDA",
+            messagingSenderId: "SILA_LETAK_MESSAGING_SENDER_ID_ANDA",
+            appId: "SILA_LETAK_APP_ID_ANDA"
         };
         
         let app, auth, db, user;
         let unsubscribeSnapshot = null; 
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'myexpiry-peribadi';
         
-        // Memeriksa jika API Key belum ditukar oleh pengguna
         const isFirebaseValid = myFirebaseConfig.apiKey && myFirebaseConfig.apiKey !== "SILA_LETAK_API_KEY_ANDA";
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : (isFirebaseValid ? myFirebaseConfig : null);
 
-        // Kawalan UI Profil & Login
-        const updateAuthUI = (u) => {
-            const btnLogin = document.getElementById('btn-login');
-            const profileArea = document.getElementById('user-profile');
-            const userName = document.getElementById('user-name');
-            const userPic = document.getElementById('user-pic');
-            const userInitial = document.getElementById('user-initial');
-
-            if (u && !u.isAnonymous) {
-                btnLogin.classList.add('hidden');
-                profileArea.classList.replace('hidden', 'flex');
-                userName.innerText = u.displayName || "Pengguna";
-                if (u.photoURL) {
-                    userPic.src = u.photoURL; userPic.classList.remove('hidden'); userInitial.classList.add('hidden');
-                } else {
-                    userPic.classList.add('hidden'); userInitial.classList.remove('hidden');
-                }
-            } else {
-                btnLogin.classList.remove('hidden');
-                profileArea.classList.replace('hidden', 'flex');
-                userName.innerText = "Tetamu (Lokal)";
-                userPic.classList.add('hidden');
-                userInitial.classList.remove('hidden');
-            }
-        };
-
-        window.loginGoogle = async () => {
-            if (!auth) {
-                document.getElementById('modal-amaran').classList.replace('hidden', 'flex');
-                return;
-            }
-            try {
-                const provider = new GoogleAuthProvider();
-                await signInWithPopup(auth, provider);
-            } catch (error) {
-                console.error("Ralat Google Auth:", error);
-                document.getElementById('modal-amaran').classList.replace('hidden', 'flex');
-            }
-        };
-
-        window.logoutGoogle = async () => {
-            if (!auth) return;
-            try {
-                await signOut(auth);
-                await signInAnonymously(auth); // Kembali ke mod tetamu
-            } catch (error) { console.error("Ralat Log Keluar:", error); }
-        };
-
-        // Inisialisasi Firebase (Dibalut dengan Try-Catch agar tidak mematikan sistem jika ralat)
         if (firebaseConfig) {
             try {
                 app = initializeApp(firebaseConfig);
@@ -599,26 +536,25 @@
 
                 onAuthStateChanged(auth, (u) => {
                     user = u;
-                    updateAuthUI(u);
                     if (u) {
                         muatTurunDataRealtime();
                     } else {
                         if(unsubscribeSnapshot) unsubscribeSnapshot();
-                        // Muat semula data dari memori jika log keluar
-                        window.pangkalanData = JSON.parse(localStorage.getItem('myexpiry_data')) || []; 
+                        window.pangkalanData = [];
+                        try {
+                            const saved = localStorage.getItem('myexpiry_data');
+                            if(saved) window.pangkalanData = JSON.parse(saved); 
+                        } catch(e) {}
                         kemaskiniData();
                     }
                 });
             } catch (err) {
                 console.error("Ralat memuatkan Firebase:", err);
-                // Matikan fungsi awan, guna memori peranti
                 auth = null; db = null; user = null;
-                updateAuthUI(null);
                 kemaskiniData();
             }
         } else {
             console.warn("Sistem berjalan menggunakan Memori Peranti (Local Storage).");
-            updateAuthUI(null);
             kemaskiniData();
         }
 
@@ -626,7 +562,8 @@
             if (!user || !db) return;
             if (unsubscribeSnapshot) unsubscribeSnapshot();
 
-            const colRef = collection(db, 'artifacts', appId, 'users', user.uid, 'myexpiry_items');
+            // Menggunakan laluan pangkalan data awam untuk dikongsi oleh semua peranti/pengguna
+            const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'myexpiry_items');
             unsubscribeSnapshot = onSnapshot(colRef, (snapshot) => {
                 window.pangkalanData = [];
                 snapshot.forEach(doc => {
@@ -681,16 +618,22 @@
         }
 
         function kemaskiniData() {
-            let mTamat = 0, wTamat = 0, amaran = 0, aktif = 0;
+            let mTamat = 0, wTamat = 0, amaran = 0, aktif = 0, mKritikal = 0;
             
             window.pangkalanData.forEach(item => {
                 let h = kiraHari(item.tarikh);
-                if (h < 0) { item.jenis === 'Makanan' ? mTamat++ : wTamat++; } 
-                else if (h <= 7) { amaran++; } 
-                else { aktif++; }
+                if (h < 0) { 
+                    item.jenis === 'Makanan' ? mTamat++ : wTamat++; 
+                } else if (h <= 7) { 
+                    amaran++;
+                    if (h <= 1 && item.jenis === 'Makanan') mKritikal++;
+                } else { 
+                    aktif++; 
+                }
             });
 
             document.getElementById('stat-makanan-tamat').innerText = mTamat;
+            document.getElementById('stat-makanan-kritikal').innerText = mKritikal;
             document.getElementById('stat-waranti-tamat').innerText = wTamat;
             document.getElementById('stat-amaran').innerText = amaran;
             document.getElementById('stat-aktif').innerText = aktif;
