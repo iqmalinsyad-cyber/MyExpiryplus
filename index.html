@@ -160,7 +160,41 @@
             <!-- Kad Makanan Tamat -->
             <div class="card-red rounded-2xl p-6 relative overflow-hidden fade-in">
                 <div class="absolute -right-4 -bottom-4 opacity-30">
-                    <img src="https://img.icons8.com/3d-fluency/100/delete-trash.png" alt="Tamat" class="w-32 h-32 object-contain opacity-50 grayscale">
+                    <img src="https://lh3.googleusercontent.com/d/1uYFj7xddisTKIVuKeyEqOhzmHnHSwIWs" alt="Tamat" class="w-32 h-32 object-contain opacity-50 grayscale">
+                </div>
+                <div class="relative z-10">
+                    <p class="font-semibold text-white/90 uppercase tracking-wider text-xs mb-1">Makanan Tamat Tempoh</p>
+                    <h2 class="text-4xl lg:text-5xl font-black mb-1" id="stat-makanan-tamat">0</h2>
+                    <p class="text-sm bg-white/20 inline-block px-3 py-1 rounded-full backdrop-blur-sm mt-2"><i class="fas fa-trash-can mr-1"></i> Sila lupuskan</p>
+                </div>
+            </div>
+
+            <!-- Kad Kritikal Makanan (Kad Baru) -->
+            <div class="card-ruby rounded-2xl p-6 relative overflow-hidden fade-in" style="animation-delay: 0.1s;">
+                <div class="absolute -right-4 -bottom-4 opacity-30">
+                    <img src="https://img.icons8.com/3d-fluency/100/box-important.png" alt="Kritikal" class="w-32 h-32 object-contain opacity-50 grayscale">
+                </div>
+                <div class="relative z-10">
+                    <p class="font-semibold text-white/90 uppercase tracking-wider text-xs mb-1">Kritikal Makanan (≤ 1 Hari)</p>
+                    <h2 class="text-4xl lg:text-5xl font-black mb-1" id="stat-makanan-kritikal">0</h2>
+                    <p class="text-xs bg-white/20 inline-block px-3 py-1 rounded-full backdrop-blur-sm mt-2"><i class="fas fa-exclamation-triangle mr-1"></i> Perhatian Segera</p>
+                </div>
+            </div>
+
+            <!-- Kad Hampir Tamat -->
+            <div class="card-orange rounded-2xl p-6 relative overflow-hidden fade-in" style="animation-delay: 0.2s;">
+                <div class="absolute -right-4 -bottom-4 opacity-20"><i class="fas fa-hourglass-half text-8xl"></i></div>
+                <div class="relative z-10">
+                    <p class="font-semibold text-white/90 uppercase tracking-wider text-xs mb-1">Amaran (Hampir Tamat)</p>
+                    <h2 class="text-4xl lg:text-5xl font-black mb-1" id="stat-amaran">0</h2>
+                    <p class="text-sm bg-white/20 inline-block px-3 py-1 rounded-full backdrop-blur-sm mt-2"><i class="fas fa-bell mr-1"></i> ≤ 7 Hari lagi</p>
+                </div>
+            </div>
+
+            <!-- Kad Waranti Tamat -->
+            <div class="card-purple rounded-2xl p-6 relative overflow-hidden fade-in" style="animation-delay: 0.3s;">
+                <div class="absolute -right-4 -bottom-4 opacity-30">
+                    <img src="https://lh3.googleusercontent.com/d/1u0QGYvpP17YH_mmDo1vdUvFcy7OiyEWu" alt="Tiada Waranti" class="w-32 h-32 object-contain opacity-50 grayscale">
                 </div>
                 <div class="relative z-10">
                     <p class="font-semibold text-white/90 uppercase tracking-wider text-xs mb-1">Makanan Tamat Tempoh</p>
@@ -373,8 +407,8 @@
         // URL Ikon 3D
         const ikonMakanan = "https://lh3.googleusercontent.com/d/1IKpcPxySHIRYsdhZ6i46vTob_0hIVmT_";
         const ikonWaranti = "https://lh3.googleusercontent.com/d/1hu1Z7oLRGxvUE37p1oX5Mhwhw53FGm5f";
-        const ikonMakananTamat = "https://img.icons8.com/3d-fluency/100/delete-trash.png"; 
-        const ikonWarantiTamat = "https://img.icons8.com/3d-fluency/100/cancel.png";    
+        const ikonMakananTamat = "https://lh3.googleusercontent.com/d/1uYFj7xddisTKIVuKeyEqOhzmHnHSwIWs"; 
+        const ikonWarantiTamat = "https://lh3.googleusercontent.com/d/1u0QGYvpP17YH_mmDo1vdUvFcy7OiyEWu";    
 
         // =========================================================================
         // 1. SETUP AWALAN
